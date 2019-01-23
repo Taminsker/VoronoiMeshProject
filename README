@@ -1,0 +1,245 @@
+=====================================
+HELP FOR THE VORONOI TESSELATION TEST 
+=====================================
+----------------------------
+A-  THE TESSELATION ROUTINES
+----------------------------
+
+The main routines are:
+
+(1)  make_voronoi 
+From a list of 'n' generators the first 'ng' 
+defining the convex hull in which the tesselation
+must be constructed this routine creates the 
+tesselation.
+This is the routine creating the smallest connectivity
+list.
+This routine is enough if one wants to transfer
+by itself te connectivity into an other format.
+
+(2)  voronoi_to_staggered(...)
+-From the tesselation it creates a mesh connectivity
+for the code ALE
+-It cleans small edges, and generators on boundary 
+(having two edges impinging with a too big angle)
+
+
+Both are calling several extra routines/files
+
+make_voronoi 
+	-delon.f90
+	-dirgen.f90
+	-trigran.f90 
+
+voronoi_to_staggered
+	-set_vertexid.f90
+	-utils.f90
+
+------------------------
+B- THE MAIN TEST PROGRAM 
+------------------------
+File:	 	voronoi_mesher.f90
+Compile : 	make
+Run executable:	./freel
+
+(1) Initialise n+4 generators, 4 being on four corners of a box,
+the rest being randomly localised into the box
+(2) Create the tesselation (make_voronoi and voronoi_to_staggered)
+(3) Create the generator file: part.#
+(4) Create the mesh file     : mesh.#
+(5) Go back to (2) and randomly displaced (lightly) the internal generators.
+Iterate until max number of cycle (asked to the user) is reached
+
+
+No cleaning is performed (usually it can not be too big a number 
+in order to avoid cleaning too much, we debugged a part of the routine
+voronoi_to_staggered but bugs may still be present. 
+This is why the routine may not be robust, 
+with criti_length=0 it is robust, but the tesselation has small edges)
+ 	critical_length = 0.0
+
+
+
+Specific routines to the test program
+	mesh_data.f90
+	Declare arrays, sizes, etc
+
+	alloc.f90
+	Allocate memory
+	
+	bibli_init.f90
+	Initialise generators
+
+
+
+
+                  WINTER 2005
+                   R.Loubere
+
+       -----------------------------------
+       ------- ALE INC(UBATOR) -----------
+       -----------------------------------
+
+Please refer to the documentation for more information about
+the code ALE INC(UBATOR).
+
+(1) Data structure
+(2) Lagrangian scheme
+(2) Mesh Untangling
+(3) Rezoning
+(4) Remapping
+(5) Features
+
+
+-------------------
+(1) Data structures
+-------------------
+
+The mesh is unstructured. No assumption is made as to the number of
+vertices of a cell or the number of cells that meet at a node.
+
+The code uses the following objects
+
+Nodes
+Cells
+Edges
+Corners
+Sides
+
+Connectivity information is held only foe corners and sides
+
+mesh_data.f90 is the file containing the variable declarations.
+mem_alloc.f90 is the file with the memory allocation commands.
+data_structures.f90 contins the routines that set up the data structures. 
+
+
+Node:
+  list_n_cn: id of one of the adjacent corners. The only rule for this 
+             is that for boundary nodes this must point to the most
+             counter-clockwise corner.
+
+Cell:
+  list_c_cn: id of one of the corners in the cell
+  list_c_s : id of one of the sides in the cell
+
+Edge:
+  Line connecting two adjacent nodes
+
+  list_e_n1: id of start node 
+  list_e_n2: id of end node
+  list_e_s1: id of left side
+  list_e_s2: id of right side
+
+                  s1
+
+      o--------------------------o
+     n1                          n2
+                  s2
+
+Corner:
+  Quadrilateral object associated with one cell and one node.
+
+  list_cn_c: id of cell
+  list_cn_n: id of node
+  list_cn_cn1: id of 1st neighbour corner
+  list_cn_cn2: id of 2nd neighbour corner
+  list_cn_cn3: id of 3rd neighbour corner
+  list_cn_cn4: id of 4th neighbour corner
+  list_cn_s1:  id of 1st neighbour side
+  list_cn_s2:  id of second neighbour side
+  list_cn_e1:  id of 1st neighbour edge
+  list_cn_e2:  id of 2nd neighbour edge
+
+
+
+       o-------------------------o
+       |            :             |
+       |            :             |
+       |            :    cn2    |
+       |                          |
+       |........... c ...........|............
+       |                         |           :
+       |            :            |           :
+       |    cn1   :    cn    |    cn3  :
+       |            :            |           :
+       |            :            |           :
+       o------------------------ n -------------------
+                    :            | 
+                    :            |
+                    :   cn4    |
+                    :            |
+                    :            |
+                    :............|
+                                 |
+
+
+
+       o-------------o
+       |            /|
+       |           / |
+       |          /  |
+       |         /   |
+       |        /    |
+       |         s2  | e2
+       |      c .....|
+       |             |
+       |    / : \    |
+       |   /  :  \   |
+       |  /   :   \  |
+       | /  s1:    \ 
+       |/     :        
+       o------------ N
+              e1
+
+
+Side:
+  Triangle formed by two adjacent nodes and cell center.
+
+  list_s_c:   id of cell
+  list_s_e:   id of edge
+  list_s_n1:  id of 1st node
+  list_s_n2:  id of 2nd node
+  list_s_s2:  id of 2nd neighbour side
+  list_s_s3:  id of 3rd neighbour side
+  list_s_s4:  id of 4th neighbour side
+  list_s_cn1: id of 1st neighbour corner
+  list_s_cn2: id of 2nd neighbour corner
+
+  (There is no 1st neighbour side)
+
+
+       o------------ n2 -----------
+       |\                  
+       | \   s4    / | \     
+       |  \       /  |  \
+       |   \     /   |   \   
+       |    \   /    |    \  
+       |             |     \ 
+       |      c   s  |  s2  |
+       |             |     / 
+       |    /   \    |    /  
+       |   /     \   |   /   
+       |  /       \  |  /
+       | /   s3    \   /    
+       |/                     
+       o------------ n1 -----------
+
+
+
+
+       o------------ n2
+       |      :       
+       |      :cn2 / |
+       |      :   /  |
+       |      :  /   |
+       |      : /    |
+       |             |   
+       |      c .....|
+       |             |
+       |      : \    |
+       |      :  \   |
+       |      :   \  |
+       |      :cn1 \ 
+       |      :        
+       o------------ n1
+

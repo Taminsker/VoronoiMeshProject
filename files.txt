@@ -1,0 +1,34 @@
+PLAN DU CODE
+------------
+voronoi_mesher.f90 <- main
+
+mesh_data.f90  <- structure dy type Mesh_struct
+bibli_init.f90 <- initialisation init_problem(...) et creation de fichiers results
+alloc.f90      <- module d'allocation, déallocation de la mémoire
+make_voronoi.f90 <- routine de construction du maillage
+ dirgen.f90
+ delon.f90
+ trigran.f90
+ utils.f90
+ setvertex_id.f90 ...  routines utiles pour la création de maillage
+
+voronoi_to_staggered.f90 <- routine de transformation dans la structure de maillage minimaliste de 'make_voronoi' dans la structure de maillage
+utilisatble pour de la manipulation/modifications
+
+COMPILATION
+-----------
+make
+
+EXECUTION
+---------
+./freel
+
+FICHIERS RESULTATS
+------------------
+end_init.plt  <- generateurs après l'init
+part.10001    <- générateurs après la création du maillage de Voronoi
+mesh.10001    <- maillage de Voronoi
+
+VISUALISATION (gnuplot)
+------------- 
+plot 'part.10001' with points,'mesh.10001' with lines linecolor 3
