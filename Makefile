@@ -1,10 +1,11 @@
 # Compilers and linkers
 # g++ is used as linker because of the presence of C++ templates in remapper
+
 F90     = gfortran
 LD      = gfortran
 GPP     = gfortran
 FFLAGS  = -g
-FFLAGSS = 
+FFLAGSS =
 
 #######################################################################
 # Directory to put the executble uale
@@ -13,9 +14,9 @@ IND	   = ./SAVE
 ########################################################################
 
 
-MODULES     = 	mesh_data.f90 alloc.f90               
+MODULES     = 	mesh_data.f90 alloc.f90
 
-MAIN_SOURCE = 	voronoi_mesher.f90               
+MAIN_SOURCE = 	voronoi_mesher.f90
 
 INIT_SOURCE =	bibli_init.f90
 
@@ -39,9 +40,9 @@ OBJECTS = $(MODULES:%.f90=%.o)     $(INIT_SOURCE:%.f90=%.o) \
 	$(F90) -c $(FFLAGS) $(FFLAGSS) $<
 
 ##########################################
-# Executable FREEL	
+# Executable FREEL
 freel:   $(OBJECTS)
-	 $(GPP) $(FFLAGS) $(FFLAGSS) -o freel $(OBJECTS) 
+	 $(GPP) $(FFLAGS) $(FFLAGSS) -o freel $(OBJECTS)
 ###########################################
 
 ############################################

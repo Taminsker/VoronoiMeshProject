@@ -6,9 +6,9 @@ program VORONOI
   ! ./freel
   !===================
 
-  use mesh_data 
+  use mesh_data
   use alloc
-  use bibli_init  
+  use bibli_init
 
   implicit none
   !
@@ -38,7 +38,7 @@ program VORONOI
   print*,'*                                              *'
   print*,'*   V O R O N O I   M E S H E R    2 D         *'
   print*,'*                                              *'
-  print*,'************************************************'     
+  print*,'************************************************'
   !
   ! Debug=0, quiet. Debug=1, print to screen
   debug = 1
@@ -60,6 +60,7 @@ program VORONOI
   ! Computational domain
   !print*,' Domain to test: '
   j = 0
+  ! read*, j
   select case( j )
   case(2)
      print*,' Enter xmin, xmax, ymin, ymax'
@@ -85,9 +86,9 @@ program VORONOI
 
   !-----------------------------------------------------------
   !
-  !   G L O B A L    A L L O C A T I O N S 
+  !   G L O B A L    A L L O C A T I O N S
   !
-  max_points = MAXP 
+  max_points = MAXP
   allocate( XYp(1:max_points,1:2), XYp0(1:max_points,1:2), WW_c(1:max_points) )
   allocate( Vp(1:100), Cp(1:max_points,1:2), Npa(1:max_points) )
   print*,' --> Allocations performed'
@@ -97,11 +98,11 @@ program VORONOI
   !
   !   I N I T I A L I S A T I O N     O F    P R O B L E M
   ! Init problem type
-  call init_problem(  XYp, Vp, Cp, Npa, problem, npart0, xmin,xmax,ymin,ymax ) 
+  call init_problem(  XYp, Vp, Cp, Npa, problem, npart0, xmin,xmax,ymin,ymax )
   npart = npart0
-  ! Copy the initial generators 
-  XYp0 = XYp  
-  print*,' --> Initialisation performed npart=',npart0    
+  ! Copy the initial generators
+  XYp0 = XYp
+  print*,' --> Initialisation performed npart=',npart0
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
@@ -113,12 +114,12 @@ program VORONOI
   write(103,*) 'ymax=',ymax
   write(103,*) 'ymin=',ymin
   write(103,*) 'dx=',(xmax-xmin)/10.0_d
-  write(103,*) 'dy=',(ymax-ymin)/10.0_d 
+  write(103,*) 'dy=',(ymax-ymin)/10.0_d
   !-----------------------------------------------------------------------------
 
 
   !-----------------------------------------------------------------------------
-  ! 
+  !
   !     M E S H E R    O F    V O R O N O I      K I N D
   !
   ! 1- Deallocate the mesh before
@@ -129,24 +130,24 @@ program VORONOI
   if( debug == 1 ) print*,'   -- > Copy generators  npart=',npart
   x(1:npart) = XYp(1:npart,1)
   y(1:npart) = XYp(1:npart,2)
-  n  = npart     
+  n  = npart
   ! ng : nb of generator on boundary
-  if( ng<0 ) then     
-     ng = 4 
+  if( ng<0 ) then
+     ng = 4
   end if
-  ! 
+  !
   ! 3- Alloc arrays
   if( debug == 1 ) print*,'   -- > Alloc Ini   ng,n=',ng,n
   call alloc_ini(Mesh)
-  ! 
+  !
   ! 4- Create Voronoi mesh
   if( debug == 1 ) print*,'   -- > Make Voronoi   ng,n=',ng,n
-  call make_voronoi  
-  ! 
+  call make_voronoi
+  !
   ! 4- Create Voronoi mesh into data structure Mesh%
   critical_length = 0.0_d  ;  critical_angle  = 0.0_d
   if( debug == 1 ) print*,'   -- > Voronoi to staggered'
-  call voronoi_to_staggered(critical_length,critical_angle)       
+  call voronoi_to_staggered(critical_length,critical_angle)
   !
   !
   !      E N D    O F    M E S H E R
@@ -164,7 +165,7 @@ program VORONOI
   allocate ( Mesh%X_n_n(1:Mesh%nn), Mesh%Y_n_n(1:Mesh%nn) )
   !-------------------------------------------------------
 
-  !------------------------------------------------------------------        
+  !------------------------------------------------------------------
   ! Copy node position
   Mesh%X_n_n(1:Mesh%nn) = xn(1:Mesh%nn)
   Mesh%Y_n_n(1:Mesh%nn) = yn(1:Mesh%nn)
@@ -174,16 +175,16 @@ program VORONOI
   !--------------------------------------------------------------------
   !
   !  C R E A T I O N       O F      F I L E S
-  !     
+  !
   icycle = 1
   write(cnum,*) icycle + maxcycle
-  cnum     = adjustl(cnum)  
-  ! OUTPUT file part      ==> File of generators  
+  cnum     = adjustl(cnum)
+  ! OUTPUT file part      ==> File of generators
   call create_part_file(filename,icycle,stringg,cnum,npart,XYp)
   print*,'   Generator file into ',filename
 
-  ! OUTPUT FILE mesh ==> File mesh.#  
-  call create_mesh_file(filename2,icycle,stringg,cnum,Mesh,XYp,WW_c)    
+  ! OUTPUT FILE mesh ==> File mesh.#
+  call create_mesh_file(filename2,icycle,stringg,cnum,Mesh,XYp,WW_c)
   print*,'   Mesh file into ',filename2
 
   ! SCRIPT FOR GNUPLOT
@@ -206,12 +207,10 @@ program VORONOI
   !------------------------------------------------------------
   !
   !  F I N A L    D E A L L O C A T I O N
-  ! 
+  !
   deallocate( XYp, XYp0, Vp, Cp, Npa, WW_c )
   !------------------------------------------------------------
 
   print*,'  OPEN GNUPLOT AND type >  load "script.gnu" '
 
 end program VORONOI
-
-
