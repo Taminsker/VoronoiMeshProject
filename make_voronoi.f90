@@ -10,7 +10,7 @@ subroutine make_voronoi
   integer :: rc,i
   integer, dimension(10) :: inf
   !
-  integer, external :: iDirGen 
+  integer, external :: iDirGen
   !
   !
   !write(*,*) 'Generating Voronoi cells'

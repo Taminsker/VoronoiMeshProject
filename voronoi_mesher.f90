@@ -9,6 +9,7 @@ program VORONOI
   use mesh_data
   use alloc
   use bibli_init
+  use our_module
 
   implicit none
   !
@@ -23,7 +24,7 @@ program VORONOI
   integer  :: ncells, npoints, nx, ny, Nppc, npart, npart0
   integer  :: nstep,channel,exxit,problem,method
   ! Characters
-  character(10)       :: filename,filename2,filename3,filename33
+  character(10)       :: filename,filename2,filename3,filename4,filename33
   character(13)       :: stringg,filename11,filename22
   character(30)       :: cnum,filefct,cnum2
   !-----------
@@ -184,8 +185,12 @@ program VORONOI
   print*,'   Generator file into ',filename
 
   ! OUTPUT FILE mesh ==> File mesh.#
+  filename4 = filename2
   call create_mesh_file(filename2,icycle,stringg,cnum,Mesh,XYp,WW_c)
   print*,'   Mesh file into ',filename2
+
+  call isoBArea(filename4, cnum,Mesh,XYp)
+  print*,'   isoB_Area file into ',filename4
 
   ! SCRIPT FOR GNUPLOT
   write(103,*) '  p [xmin-dx:xmax+dx][ymin-dy:ymax+dy+dy] "',&

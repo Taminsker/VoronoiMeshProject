@@ -1,6 +1,5 @@
 # Compilers and linkers
 # g++ is used as linker because of the presence of C++ templates in remapper
-
 F90     = gfortran
 LD      = gfortran
 GPP     = gfortran
@@ -14,7 +13,7 @@ IND	   = ./SAVE
 ########################################################################
 
 
-MODULES     = 	mesh_data.f90 alloc.f90
+MODULES     = 	mesh_data.f90 alloc.f90  our_module.f90             
 
 MAIN_SOURCE = 	voronoi_mesher.f90
 

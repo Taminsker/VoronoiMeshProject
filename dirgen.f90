@@ -13,7 +13,7 @@ end
 !**********************************************************************
 !
 integer function iDirGen()
-use Mesh_data 
+use Mesh_data
 integer ip,ip1,ip2,iv,it,it0
 integer i,j,rc
 !
@@ -118,7 +118,7 @@ end
 !**********************************************************************
 !
 integer function iVertDef()
-use Mesh_data 
+use Mesh_data
 integer i,j,jend,j0
 integer p1,p2,pi,pk,i0,i1
 double precision xx,yy,xi,yi,xj,yj,xk,yk,x1,y1,x2,y2,xs,ys,qq,a1,a2
@@ -283,7 +283,7 @@ if(neib0.EQ.i0 .and. neib1.EQ.i1) then
  dNeib(ii)%next=i
  dNeib(ii)%neib=nFikt
  rq=2*((x(i2)-x0)*dy-(y(i2)-y0)*dx)*d2
- x(nFikt)=x(i2)-rq*dy 
+ x(nFikt)=x(i2)-rq*dy
  y(nFikt)=y(i2)+rq*dx
  dType(nFikt-n)=i0
  goto 60
@@ -301,7 +301,7 @@ end
 !**********************************************************************
 !
 integer function iTestTri(it1,i1,ig1)
-use Mesh_data 
+use Mesh_data
 integer it1,i1,ig1
 double precision x0,y0,x1,y1,dx,dy,d2
 common/dDir2/ x0,y0,x1,y1,dx,dy,d2
