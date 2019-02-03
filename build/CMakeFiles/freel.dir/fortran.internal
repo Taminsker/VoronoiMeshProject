@@ -1,0 +1,6 @@
+# The fortran modules provided by this target.
+provides
+ alloc
+ bibli_init
+ mesh_data
+ our_module
