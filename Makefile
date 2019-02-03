@@ -6,6 +6,7 @@ GPP     = gfortran
 FFLAGS  = -g
 FFLAGSS =
 
+EXE = exe
 #######################################################################
 # Directory to put the executble uale
 INC     = ./EXECUTION
@@ -40,9 +41,9 @@ OBJECTS = $(MODULES:%.f90=%.o)     $(INIT_SOURCE:%.f90=%.o) \
 
 ##########################################
 # Executable FREEL
-freel:   $(OBJECTS)
-	 $(GPP) $(FFLAGS) $(FFLAGSS) -o freel $(OBJECTS)
-###########################################
+$(EXE):   $(OBJECTS)
+	 $(GPP) $(FFLAGS) $(FFLAGSS) -o $@ $(OBJECTS)
+##########################################
 
 ############################################
 # move the .o into directory $(IND)
