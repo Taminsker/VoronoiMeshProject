@@ -1,3 +1,0 @@
-/net/cremi/csenichault/espaces/travail/VoronoiMeshProject/build/CMakeFiles/rebuild_cache.dir
-/net/cremi/csenichault/espaces/travail/VoronoiMeshProject/build/CMakeFiles/edit_cache.dir
-/net/cremi/csenichault/espaces/travail/VoronoiMeshProject/build/CMakeFiles/freel.dir
