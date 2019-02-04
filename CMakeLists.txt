@@ -7,4 +7,4 @@ set(TARGET freel)
 file(GLOB SOURCE_FILES src/*.f90)
 
 add_executable(${TARGET} ${SOURCE_FILES})
-set(EXECUTABLE_OUTPUT_PATH ../.)
+#set(EXECUTABLE_OUTPUT_PATH ../.)

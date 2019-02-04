@@ -194,7 +194,8 @@ program VORONOI
 
   ! SCRIPT FOR GNUPLOT
   write(103,*) '  p [xmin-dx:xmax+dx][ymin-dy:ymax+dy+dy] "',&
-       & filename,'" t "Generator#',Mesh%nc,'" w p pt 5 ps 1 lc 3,"', filename2,'" t "Mesh" w l lt 1 lc 3 '
+       & filename,'" t "Generator#',Mesh%nc,'" w p pt 5 ps 1 lc 3,"', filename2,'" t "Mesh" w l lt 1 lc 3 ,"',&
+       & filename4,'" t "Barycentre#',Mesh%nc,'" w p pt 2 ps 1 lc 1'
   !------------------------------------------------------------------
 
   !-------------------------------------------------------

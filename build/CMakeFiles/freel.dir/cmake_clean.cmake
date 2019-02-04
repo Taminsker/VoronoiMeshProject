@@ -11,8 +11,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/freel.dir/src/utils.f90.o"
   "CMakeFiles/freel.dir/src/voronoi_mesher.f90.o"
   "CMakeFiles/freel.dir/src/voronoi_to_staggered.f90.o"
-  "../freel.pdb"
-  "../freel"
+  "freel.pdb"
+  "freel"
 )
 
 # Per-language clean rules from dependency scanning.
