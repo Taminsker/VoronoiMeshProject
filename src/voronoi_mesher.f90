@@ -16,7 +16,7 @@ program VORONOI
   ! Declarations
   ! ------------
   ! Arrays
-  real*8,  dimension(:,:),   allocatable :: XYp,XYp0,generator_length,XY_c, Weight
+  real*8,  dimension(:,:),   allocatable :: XYp, XYp0, generator_length, XY_c, Weight
   real*8,  dimension(:),     allocatable :: Vp, V_c, V_cn, V_n, W_c,WW_c
   integer, dimension(:,:),   allocatable :: Cp
   integer, dimension(:),     allocatable :: Npa
@@ -99,7 +99,7 @@ program VORONOI
   !
   !   I N I T I A L I S A T I O N     O F    P R O B L E M
   ! Init problem type
-  call init_problem(  XYp, Vp, Cp, Npa, problem, npart0, xmin,xmax,ymin,ymax )
+  call init_problem(XYp, Vp, Cp, Npa, problem, npart0, xmin,xmax,ymin,ymax )
   npart = npart0
   ! Copy the initial generators
   XYp0 = XYp

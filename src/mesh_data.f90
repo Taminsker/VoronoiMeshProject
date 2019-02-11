@@ -11,12 +11,13 @@ module mesh_data
   !
   ! Miminum accuracy for real numbers
   !
-  integer,parameter :: real_acc = selected_real_kind(P=15,R=50)
-  integer,parameter :: rr = real_acc
-  integer,parameter :: d  = real_acc
+  integer, parameter :: real_acc = selected_real_kind(P=15,R=50)
+  integer, parameter :: rr = real_acc
+  integer, parameter :: d  = real_acc
   integer, parameter :: r_acc = real_acc
   integer, parameter :: maxe = 50
   integer, parameter :: maxn = 30000 * 3
+
   type Mesh_struct
      sequence
      ! Cell
@@ -27,14 +28,17 @@ module mesh_data
      integer, dimension(:,:), pointer           :: vertex_nid
      integer, dimension(:), pointer             :: cell_nid
      integer, dimension(:,:),pointer            :: neighbor
+     real(kind=real_acc), dimension(:), pointer :: isoB, area_cell, massCenter
+
      ! Node
      integer                                    :: nn
      integer, dimension(:), pointer             :: n_l,boundary
      integer, dimension(:,:), pointer           :: node_list
      real(kind=real_acc), dimension(:), pointer :: X_n_n, Y_n_n
      integer, dimension(:), pointer             :: node_nid
+
      ! Corner
-     integer                                             :: ncn
+     integer                                    :: ncn
   end type Mesh_struct
 
   !----------------------------
