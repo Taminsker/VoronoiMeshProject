@@ -10,6 +10,7 @@ program VORONOI
   use alloc
   use bibli_init
   use our_module
+  use masscenter
 
   implicit none
   !
@@ -24,7 +25,7 @@ program VORONOI
   integer  :: ncells, npoints, nx, ny, Nppc, npart, npart0
   integer  :: nstep,channel,exxit,problem,method
   ! Characters
-  character(10)       :: filename,filename2,filename3,filename4,filename33
+  character(10)       :: filename,filename2,filename3,filename4,filename5,filename33
   character(13)       :: stringg,filename11,filename22
   character(30)       :: cnum,filefct,cnum2
   !-----------
@@ -192,10 +193,15 @@ program VORONOI
   call isoBArea(filename4, cnum,Mesh,XYp)
   print*,'   isoB_Area file into ',filename4
 
+  call cellMassCenter(filename5, cnum,Mesh,XYp)
+  print*,'   cellMassCenter file into ',filename5
+
   ! SCRIPT FOR GNUPLOT
   write(103,*) '  p [xmin-dx:xmax+dx][ymin-dy:ymax+dy+dy] "',&
-       & filename,'" t "Generator#',Mesh%nc,'" w p pt 5 ps 1 lc 3,"', filename2,'" t "Mesh" w l lt 1 lc 3 ,"',&
-       & filename4,'" t "Barycentre#',Mesh%nc,'" w p pt 2 ps 1 lc 1'
+       & filename,'" t "Generator#',Mesh%nc,'" w p pt 5 ps 1 lc 3,"', &
+       & filename2,'" t "Mesh" w l lt 1 lc 3 ,"', &
+       & filename4,'" t "Barycentre#',Mesh%nc,'" w p pt 2 ps 1 lc 1 ,"', &
+       & filename5,'" t "massCenter#',Mesh%nc,'" w p pt 5 ps 1 lc 1'
   !------------------------------------------------------------------
 
   !-------------------------------------------------------
