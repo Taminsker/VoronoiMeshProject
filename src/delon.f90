@@ -48,7 +48,7 @@ end if
 !
 xRand=13000000001.
 eps=1.e-12*sqrt((xmax-xmin)**2+(ymax-ymin)**2)
-! 
+!
 nt0=1
 
 !
@@ -63,6 +63,7 @@ n10=n/10                  ! Part for random insert
 !
 do 200 iP=1,n10
 
+
    ! Add on Raph on Dec 2009
    do
       !i=iRand()
@@ -75,7 +76,7 @@ do 200 iP=1,n10
       i=ir
       if( i<=size(iSet) ) exit
    end do
- 
+
 
  !print*,' iP,i=',iP,i,' n10=',n10
  !print*,' iSet(i)=',iSet(i),' Size(iSet)=',size(iSet)
@@ -95,7 +96,7 @@ do 200 iP=1,n10
  !print*,i,j,nt0
  if(rc.ne.0) return
  !
- call ChangeTri(i)       ! Correct triangles 
+ call ChangeTri(i)       ! Correct triangles
  !
 200 continue
 !
@@ -142,7 +143,7 @@ end
 ! the vertixes of the triangle.                                     *
 !********************************************************************
 subroutine CheckTri(i,it,rc,inf)
-use mesh_data 
+use mesh_data
 !
 integer i,it,rc,inf(10)
 integer j,k
@@ -173,7 +174,7 @@ end
 !   Here we'll build very big triangle. All points must lies in it. *
 !********************************************************************
 subroutine TriInit
-use mesh_data 
+use mesh_data
 !-------------- Local variables --------------------------------
 !
 double precision dx,dy,dx2,dy2
@@ -232,7 +233,7 @@ end
 !        iv - the number of triangle                                *
 !********************************************************************
 subroutine GetV(i1,i2,i3,iv)
-use mesh_data 
+use mesh_data
 integer i1,i2,i3,iv
 
 double precision xi1,yi1,xj1,yj1,xk1,yk1
@@ -260,7 +261,7 @@ end
 !********************************************************************
 
 integer function iRand()
-use mesh_data 
+use mesh_data
 double precision r,rn
 integer ir
 !
@@ -298,7 +299,7 @@ end
 !********************************************************************
 !
 integer function iFindTri(i0,rc)
-use mesh_data 
+use mesh_data
 !
 integer i0,rc
 integer iGetTri
@@ -318,7 +319,7 @@ end
 !********************************************************************
 !
 integer function iGetTri(x0,y0,rc)
-use mesh_data 
+use mesh_data
 !
 double precision x0,y0
 integer rc
@@ -434,7 +435,7 @@ end
 !-------------------------------------------------------------------
 !
 subroutine GetList(i0,t0,nt0)
-use mesh_data 
+use mesh_data
 !
 integer i0,t0,nt0
 !
@@ -490,7 +491,7 @@ end
 !-------------------------------------------------------------------------
 !
 subroutine ChangeTri(i0)
-use mesh_data 
+use mesh_data
 integer i0
 !
 integer i,is,i1,i2,j1,j2,j3,iv,iv0
