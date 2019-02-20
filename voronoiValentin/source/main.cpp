@@ -15,12 +15,12 @@ void reshape (int width, int height);
 
 vor::Voronoi * v;
 vor::Vertices * ver; // vrcholy
-vor::Vertices * dir; // smìry, kterými se pohybují
+vor::Vertices * dir; // smï¿½ry, kterï¿½mi se pohybujï¿½
 vor::Edges * edg;	 // hrany diagramu
 
 double w = 10000;
 
-int main (int argc, char **argv) 
+int main (int argc, char **argv)
 {
 	using namespace vor;
 
@@ -30,11 +30,11 @@ int main (int argc, char **argv)
 
 	srand ( time(NULL) );
 
-	for(int i=0; i<50; i++) 
+	for(int i=0; i<50; i++)
 	{
 
-		ver->push_back(new VPoint( w * (double)rand()/(double)RAND_MAX , w * (double)rand()/(double)RAND_MAX )); 
-		dir->push_back(new VPoint( (double)rand()/(double)RAND_MAX - 0.5, (double)rand()/(double)RAND_MAX - 0.5)); 
+		ver->push_back(new VPoint( w * (double)rand()/(double)RAND_MAX , w * (double)rand()/(double)RAND_MAX ));
+		dir->push_back(new VPoint( (double)rand()/(double)RAND_MAX - 0.5, (double)rand()/(double)RAND_MAX - 0.5));
 	}
 
 	edg = v->GetEdges(ver, w, w);
@@ -51,31 +51,31 @@ int main (int argc, char **argv)
 			{
 				std::cout << "chybi konec hrany!\n";
 				continue;
-			}	
+			}
 	}
-	
-	glutInit(&argc, argv); // Initialize GLUT
-	glutInitDisplayMode (GLUT_SINGLE); // Set up a basic display buffer (only single buffered for now)
-	glutInitWindowSize (600, 600); // Set the width and height of the window
-	glutInitWindowPosition (100, 100); // Set the position of the window
-	glutCreateWindow ("You’re first OpenGL Window"); // Set the title for the window
-	
-	glutTimerFunc(100, onEF, 0);
-	glutDisplayFunc(display); // Tell GLUT to use the method "display" for rendering
 
-	glutReshapeFunc(reshape); // Tell GLUT to use the method "reshape" for reshaping
-
-	//glutKeyboardFunc(keyPressed); // Tell GLUT to use the method "keyPressed" for key presses
-	//glutKeyboardUpFunc(keyUp); // Tell GLUT to use the method "keyUp" for key up events
-
-	glutMainLoop(); // Enter GLUT's main loop
-	
+	// glutInit(&argc, argv); // Initialize GLUT
+	// glutInitDisplayMode (GLUT_SINGLE); // Set up a basic display buffer (only single buffered for now)
+	// glutInitWindowSize (600, 600); // Set the width and height of the window
+	// glutInitWindowPosition (100, 100); // Set the position of the window
+	// glutCreateWindow ("Youï¿½re first OpenGL Window"); // Set the title for the window
+	//
+	// glutTimerFunc(100, onEF, 0);
+	// glutDisplayFunc(display); // Tell GLUT to use the method "display" for rendering
+	//
+	// glutReshapeFunc(reshape); // Tell GLUT to use the method "reshape" for reshaping
+	//
+	// //glutKeyboardFunc(keyPressed); // Tell GLUT to use the method "keyPressed" for key presses
+	// //glutKeyboardUpFunc(keyUp); // Tell GLUT to use the method "keyUp" for key up events
+	//
+	// glutMainLoop(); // Enter GLUT's main loop
+	//
 	return 0;
 }
 
 void drawVoronoi()
 {
-	
+
 	vor::Vertices::iterator j = dir->begin();
 	for(vor::Vertices::iterator i = ver->begin(); i != ver->end(); ++i)
 	{
@@ -88,8 +88,8 @@ void drawVoronoi()
 		if( (*i)->y < 0 ) (*j)->y *= -1;
 		++j;
 	}
-	
-	
+
+
 	edg = v->GetEdges(ver, w, w);
 	//std::cout << "voronoi done";
 	for(vor::Vertices::iterator i = ver->begin(); i!= ver->end(); ++i)
@@ -103,7 +103,7 @@ void drawVoronoi()
 		glEnd();
 	}
 
-	
+
 	for(vor::Edges::iterator i = edg->begin(); i!= edg->end(); ++i)
 	{
 		/*
@@ -116,15 +116,15 @@ void drawVoronoi()
 		glVertex2f( -1+2*(*i)->start->x/w,  -1+2*(*i)->start->y/w);
 		glVertex2f( -1+2*(*i)->end->x/w, -1+2*(*i)->end->y/w);
 		glEnd();
-		
+
 	}
 }
 
-void display (void) 
+void display (void)
 {
 	std::cout << "display\n";
-	glLoadIdentity(); // Load the Identity Matrix to reset our drawing locations  
-	glTranslatef(0.0f, 0.0f, -5.0f); 
+	glLoadIdentity(); // Load the Identity Matrix to reset our drawing locations
+	glTranslatef(0.0f, 0.0f, -5.0f);
 
 	glFlush();
 }
@@ -135,16 +135,16 @@ void onEF(int n)
 
 	glutTimerFunc(20, onEF, 0);
 	glClear(GL_COLOR_BUFFER_BIT);//Clear the screen
-	glClearColor(0.0f, 0.0f, 0.2f, 1.0f); // Clear the background of our window to red  
-	
+	glClearColor(0.0f, 0.0f, 0.2f, 1.0f); // Clear the background of our window to red
+
 	drawVoronoi();
 	glutSwapBuffers();
 	//Draw everything to the screen
 }
 
-void reshape (int width, int height) 
+void reshape (int width, int height)
 {
-	
+
 	glViewport(0, 0, (GLsizei)width, (GLsizei)height); // Set our viewport to the size of our window
 	glMatrixMode(GL_PROJECTION); // Switch to the projection matrix so that we can manipulate how our scene is viewed
 	glLoadIdentity(); // Reset the projection matrix to the identity matrix so that we don't get any artifacts (cleaning up)
