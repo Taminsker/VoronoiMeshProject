@@ -55,19 +55,19 @@ subroutine voronoi_to_staggered(critical_length,critical_angle)
   enddo
   !-------------------------------------------------------------------
   ! loop over cells to find node id for each cell vertex
-  ! 
+  !
   if(debug==1) print*,'    First loop of voronoi_to_staggered n=',n,check_dist
   do i=1,n
      ! get number of vertices for cell n
      nv = iGetNeibN(i)
      ! get cell info
      call GetNbAr(i,iN,nPnt)
-     call GetVAr(i,xP,yP,nPnt) 
+     call GetVAr(i,xP,yP,nPnt)
      ! loop over verticies of cell
-     do j=1,nv 
+     do j=1,nv
         ! check distance to next node in cells
         dist = (xP(j+1)-xP(j))**2 + (yP(j+1)-yP(j))**2
-        if(dist.lt.check_dist) then           
+        if(dist.lt.check_dist) then
            !
            ! next vertex in cell is below critical distance
            !  give both verticies same node id
@@ -130,7 +130,7 @@ subroutine voronoi_to_staggered(critical_length,critical_angle)
                     new_nid = Mesh%vertex_nid(i,j+1)
                     ! Raph
                     Mesh%boundary(old_nid) = 0
-                    call set_vertexid(i,j,new_nid,Mesh%vertex_nid)   
+                    call set_vertexid(i,j,new_nid,Mesh%vertex_nid)
                     ! PH, Raph
                     ! retrieve previous eventual skipped node
                     if( j==1 ) then
@@ -155,7 +155,7 @@ subroutine voronoi_to_staggered(critical_length,critical_angle)
            endif
            !
            !
-        else 
+        else
            ! next vertex in cell is above critical distance
            ! no merging
            if(Mesh%vertex_nid(i,j).eq.0) then
@@ -165,7 +165,7 @@ subroutine voronoi_to_staggered(critical_length,critical_angle)
                  if(num_skipped_node.eq.0) skipped_node = .false.
               else
                  nn = nn + 1
-                 new_nid = nn                 
+                 new_nid = nn
               endif
               ! assign vertices node number new_nid
               call set_vertexid(i,j,new_nid)
@@ -222,7 +222,7 @@ subroutine voronoi_to_staggered(critical_length,critical_angle)
      Mesh%cell_list(i,Mesh%c_l(i)+1) = Mesh%cell_list(i,1)
      ! get edge lists
      !do j=1,nv
-     !if(Mesh%vertex_nid(i,j).ne.Mesh%vertex_nid(i,j+1)) then  
+     !if(Mesh%vertex_nid(i,j).ne.Mesh%vertex_nid(i,j+1)) then
      !e_l(i) = e_l(i) + 1
      !edge_list(i,e_l(i)) = iN(j+1)
      !endif
@@ -233,8 +233,8 @@ subroutine voronoi_to_staggered(critical_length,critical_angle)
   !------------------------------------------------------------
   ! Now calculate nodal coordinates
   !
-  if(debug==1) print*,'      Phase 2 - list generation - done' 
-  if(debug==1) print*,'      Nn=',nn 
+  if(debug==1) print*,'      Phase 2 - list generation - done'
+  if(debug==1) print*,'      Nn=',nn
   do i=1,nn
      ! prevent division by zero when considering skipped node
      not_found=.true.
@@ -273,7 +273,7 @@ subroutine voronoi_to_staggered(critical_length,critical_angle)
            xn(i) = x_sum
            yn(i) = y_sum
         else
-           ! otherwise calculate average coordinate 
+           ! otherwise calculate average coordinate
            do j=1,Mesh%n_l(i)
               nv = iGetNeibN(Mesh%node_list(i,j))
               call GetVAr(Mesh%node_list(i,j),xP,yP,nPnt)
@@ -294,7 +294,7 @@ subroutine voronoi_to_staggered(critical_length,critical_angle)
   !-----------------------------------------------------------
   !open(24,file='mesh.plt')
   !do cell = 1,nc
-  !   do i = 1,Mesh%c_l(cell)          
+  !   do i = 1,Mesh%c_l(cell)
   !      write(24,*) xn( Mesh%cell_list(cell,i) ),yn( Mesh%cell_list(cell,i) )
   !   end do
   !   i=1
@@ -412,7 +412,7 @@ subroutine voronoi_to_staggered(critical_length,critical_angle)
   !       !do j=1,Mesh%c_l(i)
   !        write(*,*) 'Cell ',i,Mesh%c_l(i),' nodes asso:',Mesh%cell_list(i,:Mesh%c_l(i)+1)
   !       !enddo
-  !      enddo      
+  !      enddo
   !      write(*,*) '1<= i <= Mesh%nc, 1<= j <= Mesh%n_l(i) , Mesh%node_list(i,j)'
   !      do i=1,nn
   !       !do j=1,Mesh%n_l(i)
@@ -420,7 +420,6 @@ subroutine voronoi_to_staggered(critical_length,critical_angle)
   !       !enddo
   !      enddo
 
-  if(debug==1) print*,'    ** End Subroutine voronoi_to_staggered ncells,nnodes=',Mesh%nc,Mesh%nn
+  if(debug==1) print*,'    ** End Subroutine voronoi_to_staggered nnodes=',Mesh%nc,Mesh%nn
 
 end subroutine voronoi_to_staggered
-

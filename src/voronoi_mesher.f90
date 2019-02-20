@@ -9,6 +9,8 @@ program VORONOI
   use mesh_data
   use alloc
   use bibli_init
+  use our_module
+
 
   implicit none
   !
@@ -29,7 +31,7 @@ program VORONOI
   !-----------
   ! Reals
   real*8  :: critical_length,critical_angle
-  real*8  :: S1,S2,GG,dl,xx,yy
+  real*8  :: S1,S2,GG,dl,xx,yy, ene
   ! Integer
   integer :: i,j,k,kk,jj,ii,in,inn,ne, p
   integer :: maxcycle, max_points,max_number_generators
@@ -145,7 +147,9 @@ program VORONOI
 
 
   icycle = 1
-  do while ( icycle < 800 )
+  ! do while ( icycle < maxcycle)
+  do while ( icycle < 600)
+
     !
     ! 4- Create Voronoi mesh
     if( debug == 1 ) print*,'   -- > Make Voronoi   ng,n=',ng,n
@@ -232,53 +236,36 @@ program VORONOI
     ! Elephant place
 
     !-------------------------------------------------------------------
-
-    !--------------------------------------------------------------------
-    !
-    !  C R E A T I O N       O F      F I L E S
-    !
-    !!icycle = 1
-    !if( in==inn ) then
-    ! icycle = in
-    ! write(cnum,*) icycle + maxcycle
-    ! cnum     = adjustl(cnum)
-    ! ! OUTPUT file part      ==> File of generators
-    ! call create_part_file(filename,icycle,stringg,cnum,npart,XYp)
-    ! print*,'   Generator file into ',filename
-    !
-    ! ! OUTPUT FILE mesh ==> File mesh.#
-    ! call create_mesh_file(filename2,icycle,stringg,cnum,Mesh,XYp,WW_c)
-    ! print*,'   Mesh file into ',filename2
-    ! ! SCRIPT FOR GNUPLOT
-    ! write(103,*) '  p [xmin-dx:xmax+dx][ymin-dy:ymax+dy+dy] "',&
-    ! & filename,'" t "Generator#',Mesh%nc,'" w p pt 5 ps 1 lc 3,"', filename2,'" t "Mesh',in,'," w l lt 1 lc 3 '
-    !------------------------------------------------------------------
     icycle = icycle + 1
     do p = 5,Mesh%nc
       x(p) = Mesh%X_c(p)
       y(p) = Mesh%Y_c(p)
-      ! call random_number(XYp(p,1))
-      ! call random_number(XYp(p,2))
-      ! XYp(p, 1) = Mesh%X_c(p)
-      ! XYp(p, 2) = Mesh%Y_c(p)
     end do
+
 
     if ( modulo(icycle, 5) == 0) then
-
-
-    npart = Mesh%nc+5
-    do i = 1, 5
-      call random_number(xx)
-      call random_number(yy)
-      x(mesh%nc+i) = xx/8_d + 0.4325_d
-      y(mesh%nc+i) = yy/8_d + 0.4325_d
-    end do
-      end if
+      npart = Mesh%nc+5
+      do i = 1, 5
+        call random_number(xx)
+        call random_number(yy)
+        x(mesh%nc+i) = xx/8_d + 0.4325_d
+        y(mesh%nc+i) = yy/8_d + 0.4325_d
+      end do
+    end if
     n = npart
     ng = 4
     !-------------------------------------------------------
     ! Deallocation of  (node) structure for node positions
     !-------------------------------------------------------
+    ene = energyFunction(Mesh, XYp)
+    print*, "Energy = ",ene, "cycle = ", icycle
+
+    if (ene < 1E-006) then
+      deallocate(Mesh%X_n_n, Mesh%Y_n_n)
+      deallocate(Mesh%X_c, Mesh%Y_c)
+      exit
+    end if
+
     deallocate(Mesh%X_n_n, Mesh%Y_n_n)
     deallocate(Mesh%X_c, Mesh%Y_c)
   end do

@@ -7,7 +7,7 @@ module our_module
 contains
   function areaTri(p1, p2, p3)
     real*8,  dimension(0:1), intent(inout) :: p1, p2, p3
-    real :: areaTri
+    real*8 :: areaTri
     areaTri = (0.5d0) * abs((p2(0)-p1(0))*(p3(1)-p1(1))- (p3(0)-p1(0))*(p2(1)-p1(1)))
   end function areaTri
 
@@ -78,5 +78,24 @@ contains
     print*, 'volume total = ', volumeTotal
     close(25)
   end subroutine isoBArea
+
+  function energyFunction(Mesh, oldGen)
+    type(Mesh_struct), intent(in)    :: Mesh
+    real*8                           :: energyFunction, tempX, tempY
+    real*8, dimension(:, :), intent(in) :: oldGen
+    integer :: i
+
+    tempX = 0
+    tempY = 0
+
+    do i = 5, Mesh%nc
+      tempX = tempX + (oldGen(i, 1) - Mesh%X_c(i))**2
+      tempY = tempY + (oldGen(i, 2) - Mesh%Y_c(i))**2
+    end do
+
+  energyFunction = MAX(tempX, tempY)
+
+  end function energyFunction
+
 
 end module our_module
