@@ -1,12 +1,13 @@
 module bibli_init
- 
-  use mesh_data
 
-  implicit none 
- 
+  use mesh_data
+  use our_module
+
+  implicit none
+
 contains
 
-  
+
   subroutine compute_centroids_via_triangles( Mesh, XYp )
     implicit none
     type(Mesh_struct),      intent(inout) :: Mesh
@@ -29,10 +30,10 @@ contains
           x0 = XYp(ic,1) ; y0 = XYp(ic,2)
           ! Triangle T=(X0,X1,X2)
           SurfT =  abs(0.5d0*( (x1-x0)*(y2-y0) - (x2-x0)*(y1-y0) ))
-          ! Centroid of triangle T : Xt,Yt 
+          ! Centroid of triangle T : Xt,Yt
           Xt = 1.0d0/6.0d0*( (y1-y0)*(x1**2+x1*x0+x0**2) + &
                &             (y2-y1)*(x2**2+x2*x1+x1**2) + &
-               &             (y0-y2)*(x0**2+x0*x2+x2**2) ) 
+               &             (y0-y2)*(x0**2+x0*x2+x2**2) )
           Yt =-1.0d0/6.0d0*( (x1-x0)*(y1**2+y1*y0+y0**2) + &
                &             (x2-x1)*(y2**2+y2*y1+y1**2) + &
                &             (x0-x2)*(y0**2+y0*y2+y2**2) )
@@ -57,7 +58,7 @@ contains
        ! Centroid of triangle T : Xt,Yt
        Xt = 1.0d0/6.0d0*( (y1-y0)*(x1**2+x1*x0+x0**2) + &
             &             (y2-y1)*(x2**2+x2*x1+x1**2) + &
-            &             (y0-y2)*(x0**2+x0*x2+x2**2) ) 
+            &             (y0-y2)*(x0**2+x0*x2+x2**2) )
        Yt =-1.0d0/6.0d0*( (x1-x0)*(y1**2+y1*y0+y0**2) + &
             &             (x2-x1)*(y2**2+y2*y1+y1**2) + &
             &             (x0-x2)*(y0**2+y0*y2+y2**2) )
@@ -76,11 +77,11 @@ contains
        ! Store results
        Mesh%X_c(ic) = Xc
        Mesh%Y_c(ic) = Yc
-       
+
     end do
   end subroutine compute_centroids_via_triangles
-  
-  
+
+
   subroutine compute_centroids( Mesh )
     implicit none
     type(Mesh_struct),intent(inout) :: Mesh
@@ -88,12 +89,12 @@ contains
     real*8  :: Sc
     do i = 1, Mesh%nc
        ! This call compute the cell surface
-       Sc          = cell_center_massM(Mesh,i,0.0d0,0.0d0,1.0d0) 
+       Sc          = cell_center_massM(Mesh,i,0.0d0,0.0d0,1.0d0)
        Mesh%X_c(i) = cell_center_massM(Mesh,i,1.0d0,0.0d0,0.0d0) / Sc
        Mesh%Y_c(i) = cell_center_massM(Mesh,i,0.0d0,1.0d0,0.0d0) / Sc
     end do
   end subroutine compute_centroids
-  
+
   function cell_center_massM(Mesh,ic,a,b,c)
     implicit none
     !
@@ -118,31 +119,31 @@ contains
     !print*,' Centroid of cell',ic,a,b,c
     do i = 1,Mesh%c_l(ic)-1
        ! Find the points for performing the integral
-       xx = Mesh%X_n_n( Mesh%cell_list(ic,i) )   ;  yy = Mesh%Y_n_n( Mesh%cell_list(ic,i) )        
-       uu = Mesh%X_n_n( Mesh%cell_list(ic,i+1) ) ;  vv = Mesh%Y_n_n( Mesh%cell_list(ic,i+1) )         
+       xx = Mesh%X_n_n( Mesh%cell_list(ic,i) )   ;  yy = Mesh%Y_n_n( Mesh%cell_list(ic,i) )
+       uu = Mesh%X_n_n( Mesh%cell_list(ic,i+1) ) ;  vv = Mesh%Y_n_n( Mesh%cell_list(ic,i+1) )
        !
        !print*,i,Mesh%c_l(ic), Mesh%cell_list(ic,i), Mesh%cell_list(ic,i+1)
-       line_integral2 = line_integral2 & 
+       line_integral2 = line_integral2 &
             &  + a6 * (vv-yy)*(uu**2 + uu*xx + xx**2)  &
             &  - b6 * (uu-xx)*(vv**2 + vv*yy + yy**2)  &
-            &  + c2 * (vv-yy)*(uu+xx)         
+            &  + c2 * (vv-yy)*(uu+xx)
     end do
     i = Mesh%c_l(ic)
-    xx = Mesh%X_n_n( Mesh%cell_list(ic,i) )   ;  yy = Mesh%Y_n_n( Mesh%cell_list(ic,i) )  
+    xx = Mesh%X_n_n( Mesh%cell_list(ic,i) )   ;  yy = Mesh%Y_n_n( Mesh%cell_list(ic,i) )
     uu = Mesh%X_n_n( Mesh%cell_list(ic,1) )   ;  vv = Mesh%Y_n_n( Mesh%cell_list(ic,1) )
     !print*,i,Mesh%c_l(ic), Mesh%cell_list(ic,i), Mesh%cell_list(ic,1)
-    line_integral2 = line_integral2 & 
+    line_integral2 = line_integral2 &
          &  + a6 * (vv-yy)*(uu**2 + uu*xx + xx**2) &
          &  - b6 * (uu-xx)*(vv**2 + vv*yy + yy**2)  &
-         &  + c2 * (vv-yy)*(uu+xx)  
+         &  + c2 * (vv-yy)*(uu+xx)
     !
     cell_center_massM = line_integral2
     !print*,cell_center_massM
     !
   end function cell_center_massM
-  
 
-  
+
+
   ! INITIALISATION OF PROBLEM TYPE
   ! 0: random position of generators
   ! 1: uniform
@@ -153,9 +154,9 @@ contains
   ! 6: full disk
   ! 7: -
   ! default: read a file of generators or mesh
-  
+
   subroutine init_problem( XYp, Vp, Cp, Np, problem, nnature, xmin,xmax,ymin,ymax )
-    implicit none    
+    implicit none
     ! Initialize the problem to be run
     !-------------
     ! Parameters
@@ -230,13 +231,13 @@ contains
           p = p + 1
           call random_number(XYp(p,1))
           call random_number(XYp(p,2))
-          Np(p) = 2          
+          Np(p) = 2
        end do
        npart = p
        ng = -1
        print*,' Number of elephants =',ne
-       print*,'   ..Generators OK p=',p       
-    case(0)    
+       print*,'   ..Generators OK p=',p
+    case(0)
        ! Random
        p = 0
        nppc = 2500
@@ -249,7 +250,9 @@ contains
        XYp(2,1) = xmax; XYp(2,2) = ymin
        XYp(3,1) = xmax; XYp(3,2) = ymax
        XYp(4,1) = xmin; XYp(4,2) = ymax
-       p = 4
+       call zone(Mesh, XYp, 0.25_d, 0.25_d, 0.1_d, 0.75_d, 0.75_d, 0.1_d)
+       p = 206 !4
+       nppc = nppc + 200
        qq = p+1
        do q = qq,nppc
           p = p + 1
@@ -264,7 +267,7 @@ contains
        !if( i==1 ) then
        !   print*,'  ==> Point to refine (x,y) and number of extra generator' ; read*,xx,yy,ng
        !   qq = p + 1
-       !   nppc= nppc +  ng          
+       !   nppc= nppc +  ng
        !   xmx = 0.1d0; ymx = 0.1d0
        !   do q = qq,nppc
        !      p = p + 1
@@ -278,14 +281,14 @@ contains
        npart = p
        ng = -1
        print*,'   ..Generators OK p=',p
-    case(1)    
+    case(1)
        ! Uniform
        p = 0
        nppc = 250
        print*,'   How many generators (ex: 125,2500)?'
        read*,nppc
-       dx = (xmx-xmn) / (sqrt(real(nppc)) )  
-       dy = (ymx-ymn) / (sqrt(real(nppc)) )   
+       dx = (xmx-xmn) / (sqrt(real(nppc)) )
+       dy = (ymx-ymn) / (sqrt(real(nppc)) )
        ii = sqrt(real(nppc))
        print*,' Delta x, Delta y=',dx,dy,' Nc x Nc=',ii,'x',ii
        pp = 0
@@ -296,7 +299,7 @@ contains
        XYp(2,1) = xmax; XYp(2,2) = ymin
        XYp(3,1) = xmax; XYp(3,2) = ymax
        XYp(4,1) = xmin; XYp(4,2) = ymax
-       pp = 4       
+       pp = 4
        do q = 1,ii
           do p = 1,ii
              pp = pp + 1
@@ -306,7 +309,7 @@ contains
              else
                 XYp(pp,1) = xmn + dx/2.d0 + (p-1)*dx -dx/5.d0
                 XYp(pp,2) = ymn + dy/2.d0 + (q-1)*dy -dy/5.d0
-             end if              
+             end if
              Np(pp) = 1
           end do
        end do
@@ -314,18 +317,18 @@ contains
        npart = p
        ng = -1
        print*,'   ..Generators OK p=',p
-    case(2)  
+    case(2)
        !
     case(3)
        !
     case(4)
-       ! 
+       !
     case(5)
        !
     case(6)
        !
     case(7)
-       ! 
+       !
     case default
        ! Read a file of generators
        !filenamee = 'T.mesh'
@@ -341,8 +344,8 @@ contains
     end select
 
     ! Final computational bounds
-    xmin = minval(XYp(:,1)); ymin = minval(XYp(:,2)); 
-    xmax = maxval(XYp(:,1)); ymax = maxval(XYp(:,2)); 
+    xmin = minval(XYp(:,1)); ymin = minval(XYp(:,2));
+    xmax = maxval(XYp(:,1)); ymax = maxval(XYp(:,2));
     ! Final number of particles
     nnature = p
     !
@@ -355,43 +358,43 @@ contains
 
 
 subroutine create_wcentroid_file(filename3,icycle,stringg,cnum,Mesh )
-    implicit none    
+    implicit none
     !-------------
     ! Parameters
     type(Mesh_struct),     intent(in) :: Mesh
     character(11),intent(inout)       :: stringg
-    character(30) ,intent(inout)      :: cnum 
+    character(30) ,intent(inout)      :: cnum
     integer,intent(inout)                :: icycle
     character(10),intent(inout) :: filename3
     integer :: p
-    !------------    
+    !------------
     stringg  = 'wcen.'
-    filename3 = trim(stringg)//trim(cnum) 
-    open(21,file=filename3) 
+    filename3 = trim(stringg)//trim(cnum)
+    open(21,file=filename3)
     do p = 1,Mesh%nc
        write(21,*) Mesh%X_c(p),Mesh%Y_c(p)
     end do
-    close(21)   
+    close(21)
   end subroutine create_wcentroid_file
 
   subroutine create_centroid_file(filename3,icycle,stringg,cnum,Mesh )
-    implicit none    
+    implicit none
     !-------------
     ! Parameters
     type(Mesh_struct),     intent(in) :: Mesh
     character(11),intent(inout)       :: stringg
-    character(30) ,intent(inout)      :: cnum 
+    character(30) ,intent(inout)      :: cnum
     integer,intent(inout)                :: icycle
     character(10),intent(inout) :: filename3
     integer :: p
-    !------------    
+    !------------
     stringg  = 'cent.'
-    filename3 = trim(stringg)//trim(cnum) 
-    open(21,file=filename3) 
+    filename3 = trim(stringg)//trim(cnum)
+    open(21,file=filename3)
     do p = 1,Mesh%nc
        write(21,*) Mesh%X_c(p),Mesh%Y_c(p)
     end do
-    close(21)   
+    close(21)
   end subroutine create_centroid_file
 
   subroutine create_part_file( filename, icycle,stringg,cnum,npart,XYp )
@@ -400,19 +403,19 @@ subroutine create_wcentroid_file(filename3,icycle,stringg,cnum,Mesh )
     ! Parameters
     real*8, dimension(:,:),  intent(in) :: XYp
     character(11),intent(inout)       :: stringg
-    character(30) ,intent(inout)      :: cnum 
+    character(30) ,intent(inout)      :: cnum
     integer,intent(inout)                :: npart,icycle
     character(10),intent(inout) :: filename
     integer :: p
     !------------
     stringg  = 'part.'
-    filename = trim(stringg)//trim(cnum) 
+    filename = trim(stringg)//trim(cnum)
     !print*,' Cycle =',icycle,' file=',filename
-    open(21,file=filename) 
+    open(21,file=filename)
     do p = 1,npart
        write(21,*) XYp(p,1),XYp(p,2)
     end do
-    close(21)      
+    close(21)
   end subroutine create_part_file
 
 
@@ -421,29 +424,29 @@ subroutine create_wcentroid_file(filename3,icycle,stringg,cnum,Mesh )
     !-------------
     ! Parameters
     type(Mesh_struct),     intent(in) :: Mesh
-    real*8, dimension(:,:),  intent(in) :: XYp 
+    real*8, dimension(:,:),  intent(in) :: XYp
     real*8, dimension(:),  intent(in) :: Res
     character(11),intent(inout)       :: stringg
-    character(30) ,intent(inout)      :: cnum 
+    character(30) ,intent(inout)      :: cnum
     integer,intent(inout)                :: icycle
     character(10),intent(inout) :: filename2
     integer :: i,j
     real*8 :: xx,yy
-    !------------    
+    !------------
     stringg  = 'mesh.'
-    filename2 = trim(stringg)//trim(cnum) 
+    filename2 = trim(stringg)//trim(cnum)
     filename2 = trim(filename2)
     open(24,file=filename2)
     xx = 0.9d0
     xx = 1.0d0
     yy = 1.0d0 - xx
     do j = 1,Mesh%nc
-       do i = 1,Mesh%c_l(j) 
-          write(24,*) xx* xn( Mesh%cell_list(j,i) ) + yy * XYp(j,1) ,& 
+       do i = 1,Mesh%c_l(j)
+          write(24,*) xx* xn( Mesh%cell_list(j,i) ) + yy * XYp(j,1) ,&
                &        xx* yn( Mesh%cell_list(j,i) ) + yy * XYp(j,2) , Res(j)
        end do
        i=1
-       write(24,*) xx* xn( Mesh%cell_list(j,i) ) + yy * XYp(j,1) ,& 
+       write(24,*) xx* xn( Mesh%cell_list(j,i) ) + yy * XYp(j,1) ,&
             &        xx* yn( Mesh%cell_list(j,i) ) + yy * XYp(j,2) , Res(j)
        write(24,*) ''
        write(24,*) ''
@@ -458,23 +461,24 @@ subroutine create_wcentroid_file(filename3,icycle,stringg,cnum,Mesh )
     !-------------
     ! Parameters
     type(Mesh_struct),     intent(in) :: Mesh
-    real*8, dimension(:,:),  intent(in) :: XYp 
+    real*8, dimension(:,:),  intent(in) :: XYp
     real*8, dimension(:),  intent(in) :: Res
     character(11),intent(inout)       :: stringg
-    character(30) ,intent(inout)      :: cnum 
+    character(30) ,intent(inout)      :: cnum
     integer,intent(inout)                :: icycle
     character(10),intent(inout) :: filename2
     integer :: i,j,in,ic1,ic2,ic3
-    !------------    
+    !------------
     stringg  = 'tria.'
-    filename2 = trim(stringg)//trim(cnum) 
+    filename2 = trim(stringg)//trim(cnum)
     filename2 = trim(filename2)
     open(24,file=filename2)
     do in = 1,Mesh%nn
+      !a utiliser pour le W_p et W_c
        if( Mesh%n_l(in)>=3 ) then
           ic1 = Mesh%node_list(in,1)
           ic2 = Mesh%node_list(in,2)
-          ic3 = Mesh%node_list(in,3)          
+          ic3 = Mesh%node_list(in,3)
           write(24,*) XYp(ic1,1),XYp(ic1,2)
           write(24,*) XYp(ic2,1),XYp(ic2,2)
           write(24,*) XYp(ic3,1),XYp(ic3,2)
@@ -486,5 +490,6 @@ subroutine create_wcentroid_file(filename3,icycle,stringg,cnum,Mesh )
     close(24)
   end subroutine create_trimesh_file
 
-  
+
+
 end module bibli_init

@@ -79,4 +79,45 @@ contains
     close(25)
   end subroutine isoBArea
 
+
+  function potential(t,t0,t1,a,b)
+    implicit none
+    real*8, intent(in) :: a, b
+    integer, intent(in) :: t0,t1,t
+    real*8 :: potential
+
+    if (t < t0) then
+      potential = a
+    elseif (t < t1) then
+      potential = ((a - b) / (t0 - t1) * t) + a - (a - b) / (t0 - t1) * t0
+    else
+      potential = b
+    end if
+  end function potential
+
+  subroutine zone(Mesh, XYp, x0, y0, d0, x1, y1, d1)
+    implicit none
+
+    type(Mesh_struct),     intent(inout) :: Mesh
+    real*8, intent(in) :: x0, y0, d0, d1, x1, y1
+    real*8,  dimension(:,:) :: XYp
+
+    integer :: i
+
+    do i = 5, 105
+      call random_number(XYp(i,1))
+      call random_number(XYp(i,2))
+      XYp(i,1) = XYp(i,1) * d0 + x0
+      XYp(i,2) = XYp(i,2) * d0 + y0
+    end do
+
+    do i = 106, 206
+      call random_number(XYp(i,1))
+      call random_number(XYp(i,2))
+      XYp(i,1) = XYp(i,1) * d1 + x1
+      XYp(i,2) = XYp(i,2) * d1 + y1
+    end do
+  end subroutine
+
+
 end module our_module

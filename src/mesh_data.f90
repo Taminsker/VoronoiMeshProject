@@ -22,9 +22,9 @@ module mesh_data
      sequence
      ! Cell
      integer                                    :: nc
-     real(kind=real_acc), dimension(:), pointer :: X_c, Y_c
-     integer, dimension(:), pointer             :: c_l
-     integer, dimension(:,:), pointer           :: cell_list
+     real(kind=real_acc), dimension(:), pointer :: X_c, Y_c ! centroids coor
+     integer, dimension(:), pointer             :: c_l ! nombre de sommets de la cellule courante
+     integer, dimension(:,:), pointer           :: cell_list ! liste des cellules
      integer, dimension(:,:), pointer           :: vertex_nid
      integer, dimension(:), pointer             :: cell_nid
      integer, dimension(:,:),pointer            :: neighbor
@@ -50,7 +50,7 @@ module mesh_data
   !
   ! used when voronoi is invoked
   !
-  ! Miminum accuracy for real numbers
+  ! Miminum accuracy for real numbers XYp0(1:max_poin
   !
   !
   !

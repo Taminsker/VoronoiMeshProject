@@ -9,6 +9,7 @@ program VORONOI
   use mesh_data
   use alloc
   use bibli_init
+  use our_module
 
   implicit none
   !
@@ -29,7 +30,8 @@ program VORONOI
   !-----------
   ! Reals
   real*8  :: critical_length,critical_angle
-  real*8  :: S1,S2,GG,dl,xx,yy
+  real*8  :: S1,S2,GG,dl,xx,yy,energy,energy0, pot
+
   ! Integer
   integer :: i,j,k,kk,jj,ii,in,inn,ne, p
   integer :: maxcycle, max_points,max_number_generators
@@ -42,7 +44,7 @@ program VORONOI
   print*,'************************************************'
   !
   ! Debug=0, quiet. Debug=1, print to screen
-  debug = 1
+  debug = 0
 
   !----------------------------------------------------
   ! Define small real numbers to compare two reals
@@ -134,7 +136,7 @@ program VORONOI
   y(1:npart) = XYp(1:npart,2)
   n  = npart
   ! ng : nb of generator on boundary
-  if( ng<0 ) then
+  if( ng < 0 ) then
     ng = 4
   end if
   !
@@ -145,7 +147,8 @@ program VORONOI
 
 
   icycle = 1
-  do while ( icycle < 800 )
+  open (12,file="energy")
+  do while ( icycle < 200 )
     !
     ! 4- Create Voronoi mesh
     if( debug == 1 ) print*,'   -- > Make Voronoi   ng,n=',ng,n
@@ -191,6 +194,13 @@ program VORONOI
     ! Compute centroids
     !call compute_centroids( Mesh )
     call compute_centroids_via_triangles( Mesh, XYp )
+
+    if (icycle == 1 ) then
+      energy0=0
+        do p=5,Mesh%nc
+          energy0=energy0+sqrt((x(p)-Mesh%X_c(p))**2 + (y(p)-Mesh%Y_c(p))**2 )
+        enddo
+    endif
     !-------------------------------------------------------
 
     !--------------------------------------------------------------------
@@ -254,7 +264,9 @@ program VORONOI
     ! & filename,'" t "Generator#',Mesh%nc,'" w p pt 5 ps 1 lc 3,"', filename2,'" t "Mesh',in,'," w l lt 1 lc 3 '
     !------------------------------------------------------------------
     icycle = icycle + 1
-    do p = 5,Mesh%nc
+    energy = 0.0
+    do p = 205,Mesh%nc
+      energy=energy+sqrt((x(p)-Mesh%X_c(p))**2 + (y(p)-Mesh%Y_c(p))**2)
       x(p) = Mesh%X_c(p)
       y(p) = Mesh%Y_c(p)
       ! call random_number(XYp(p,1))
@@ -263,19 +275,28 @@ program VORONOI
       ! XYp(p, 2) = Mesh%Y_c(p)
     end do
 
-    if ( modulo(icycle, 5) == 0) then
+    print*, icycle,energy,energy0,(energy/energy0)*100.0_d,"%"
+    write(12,*) icycle,energy
+    if (energy/energy0*100.0_d<1) then
+      exit
+    endif
 
 
-    npart = Mesh%nc+5
-    do i = 1, 5
-      call random_number(xx)
-      call random_number(yy)
-      x(mesh%nc+i) = xx/8_d + 0.4325_d
-      y(mesh%nc+i) = yy/8_d + 0.4325_d
-    end do
-      end if
+
+
+    !if ( modulo(icycle, 20) == 0) then
+   !  if (energy/energy0*100.0_d<5) then
+   ! !
+   !  npart = Mesh%nc+5
+   !  do i = 1, 5
+   !    call random_number(xx)
+   !    call random_number(yy)
+   !    x(mesh%nc+i) = xx/8_d + 0.4325_d
+   !    y(mesh%nc+i) = yy/8_d + 0.4325_d
+   !  end do
+   ! end if
     n = npart
-    ng = 4
+    ng = 205
     !-------------------------------------------------------
     ! Deallocation of  (node) structure for node positions
     !-------------------------------------------------------
@@ -286,6 +307,20 @@ program VORONOI
   !   C L O S I N G    A R E A
   ! Close script files
   close(103)
+  close(12)
+
+
+
+!call potential(t,t0,t1,a,b,pot)
+  !open(13,file="potentiel")
+  !do p = 0,30
+
+    ! pot = potential(p,10,20,0.5_d,1.0_d)
+
+    ! write(13,*) p,pot
+  ! end do
+
+  ! close(13)
   !----------------------------------------
 
   !------------------------------------------------------------
