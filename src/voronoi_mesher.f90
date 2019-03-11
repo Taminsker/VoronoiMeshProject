@@ -148,7 +148,7 @@ program VORONOI
 
   icycle = 1
   open (12,file="energy")
-  do while ( icycle < 200 )
+  do while ( icycle < 100 )
     !
     ! 4- Create Voronoi mesh
     if( debug == 1 ) print*,'   -- > Make Voronoi   ng,n=',ng,n
@@ -265,7 +265,7 @@ program VORONOI
     !------------------------------------------------------------------
     icycle = icycle + 1
     energy = 0.0
-    do p = 205,Mesh%nc
+    do p = 5,Mesh%nc
       energy=energy+sqrt((x(p)-Mesh%X_c(p))**2 + (y(p)-Mesh%Y_c(p))**2)
       x(p) = Mesh%X_c(p)
       y(p) = Mesh%Y_c(p)
@@ -284,19 +284,19 @@ program VORONOI
 
 
 
-    !if ( modulo(icycle, 20) == 0) then
-   !  if (energy/energy0*100.0_d<5) then
-   ! !
-   !  npart = Mesh%nc+5
-   !  do i = 1, 5
-   !    call random_number(xx)
-   !    call random_number(yy)
-   !    x(mesh%nc+i) = xx/8_d + 0.4325_d
-   !    y(mesh%nc+i) = yy/8_d + 0.4325_d
-   !  end do
-   ! end if
+    if ( modulo(icycle, 20) == 0) then
+    ! if (energy/energy0*100.0_d<5) then
+   !
+    npart = Mesh%nc+5
+    do i = 1, 5
+      call random_number(xx)
+      call random_number(yy)
+      x(mesh%nc+i) = xx/8_d + 0.4325_d
+      y(mesh%nc+i) = yy/8_d + 0.4325_d
+    end do
+   end if
     n = npart
-    ng = 205
+    ng = 4
     !-------------------------------------------------------
     ! Deallocation of  (node) structure for node positions
     !-------------------------------------------------------

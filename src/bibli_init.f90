@@ -250,9 +250,10 @@ contains
        XYp(2,1) = xmax; XYp(2,2) = ymin
        XYp(3,1) = xmax; XYp(3,2) = ymax
        XYp(4,1) = xmin; XYp(4,2) = ymax
-       call zone(Mesh, XYp, 0.25_d, 0.25_d, 0.1_d, 0.75_d, 0.75_d, 0.1_d)
-       p = 206 !4
-       nppc = nppc + 200
+       ! call zone(Mesh, XYp, 0.25_d, 0.25_d, 0.1_d, 0.75_d, 0.75_d, 0.1_d)
+       ! p = 206 !4
+       p = 4
+       ! nppc = nppc + 200
        qq = p+1
        do q = qq,nppc
           p = p + 1
