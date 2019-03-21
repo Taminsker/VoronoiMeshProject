@@ -31,6 +31,7 @@ contains
       write(*,'("Allocation error in alloc - vertex_nid, cell_nid, node_nid")')
       stop
     endif
+    
   end subroutine alloc_ini
 
   subroutine dealloc_ini_all(Mesh)

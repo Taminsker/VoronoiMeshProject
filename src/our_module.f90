@@ -119,5 +119,51 @@ contains
     end do
   end subroutine
 
+  ! subroutine temporaire(Mesh)
+  !   implicit none
+  !   type(Mesh_struct),     intent(inout) :: Mesh
+  !   open(26,file="neighbor.txt")
+  !   write(26,*) Mesh%neighbor
+  !   close(26)
+  ! end subroutine
 
+
+  subroutine odour_transmission(Mesh,time, W_c, W_p)
+    implicit none
+    type(Mesh_struct), intent(in) :: Mesh
+    real*8,  dimension(:), intent(inout) :: W_c,W_p
+    integer, intent (in) :: time
+    ! real*8 :: k
+    integer :: i,j, icycle2_the_return_MOMY, k
+
+    ! initialisation step
+
+    W_c(1:4) = 0
+    W_c(5:104) = potential(time, 133, 233, 0.25d0, 0.75d0)
+    W_c(105:204) = potential(time, 100, 350, 1d0, 0d0)
+    W_c(205:Mesh%nc)=0
+
+    ! beginning of the odour transmition
+
+    do icycle2_the_return_MOMY = 1,Mesh%nc ! nombre a definir, ou alors avec une condition d'arret
+      do i = 1,Mesh%nn
+        W_p(i) = 0.0d0
+        do j = 1,Mesh%n_l(i)  ! boucle sur les noeuds
+          k = Mesh%node_list(i,j)  ! numero de la j-ieme cellule autours du noeuds
+          W_p(i) = W_p(i) + W_c(k)
+        end do
+        W_p(i) = W_p(i)/dble(Mesh%n_l(i)) ! dble convert an int inot a double
+      end do
+
+      do j = 1,Mesh%nc
+        W_c(j) = 0
+        do i= 1,Mesh%c_l(j)
+          k = Mesh%cell_list(j,i)
+          W_c(j) = W_c(j) + W_p(k)
+        end do
+        W_c(j) = W_c(j)/Mesh%c_l(j)
+      end do
+    end do
+
+  end subroutine
 end module our_module

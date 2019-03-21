@@ -93,6 +93,8 @@ program VORONOI
   max_points = MAXP
   allocate( XYp(1:max_points,1:2), XYp0(1:max_points,1:2), WW_c(1:max_points) )
   allocate( Vp(1:100), Cp(1:max_points,1:2), Npa(1:max_points) )
+  allocate( W_p(1:max_points), W_c(1:max_points) )
+
   print*,' --> Allocations performed'
   !----------------------------------------------------------
 
@@ -148,7 +150,7 @@ program VORONOI
 
   icycle = 1
   open (12,file="energy")
-  do while ( icycle < 100 )
+  do while ( icycle < 400 )
     !
     ! 4- Create Voronoi mesh
     if( debug == 1 ) print*,'   -- > Make Voronoi   ng,n=',ng,n
@@ -167,6 +169,7 @@ program VORONOI
 
     allocate( Mesh%X_n_n(1:Mesh%nn), Mesh%Y_n_n(1:Mesh%nn) )
     allocate( Mesh%X_c(1:Mesh%nc), Mesh%Y_c(1:Mesh%nc) )
+
     !
     !
     !      E N D    O F    M E S H E R
@@ -280,21 +283,22 @@ program VORONOI
     if (energy/energy0*100.0_d<1) then
       exit
     endif
+    call odour_transmission(Mesh,icycle, W_c, W_p)
 
 
 
 
-    if ( modulo(icycle, 20) == 0) then
-    ! if (energy/energy0*100.0_d<5) then
-   !
-    npart = Mesh%nc+5
-    do i = 1, 5
-      call random_number(xx)
-      call random_number(yy)
-      x(mesh%nc+i) = xx/8_d + 0.4325_d
-      y(mesh%nc+i) = yy/8_d + 0.4325_d
-    end do
-   end if
+   !  if ( modulo(icycle, 20) == 0) then
+   !  ! if (energy/energy0*100.0_d<5) then
+   ! !
+   !  npart = Mesh%nc+5
+   !  do i = 1, 5
+   !    call random_number(xx)
+   !    call random_number(yy)
+   !    x(mesh%nc+i) = xx/8_d + 0.4325_d
+   !    y(mesh%nc+i) = yy/8_d + 0.4325_d
+   !  end do
+   ! end if
     n = npart
     ng = 4
     !-------------------------------------------------------
@@ -328,7 +332,7 @@ program VORONOI
   !  F I N A L    D E A L L O C A T I O N
   !
 
-  deallocate( XYp, XYp0, Vp, Cp, Npa, WW_c )
+  deallocate( XYp, XYp0, Vp, Cp, Npa, WW_c, W_p, W_c )
   !------------------------------------------------------------
 
   print*,'  OPEN GNUPLOT AND type >  load "script.gnu" '
