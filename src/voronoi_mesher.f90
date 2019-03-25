@@ -25,7 +25,7 @@ program VORONOI
   integer  :: nstep,channel,exxit,problem,method
   ! Characters
   character(10)       :: filename,filename2,filename3,filename33
-  character(13)       :: stringg,filename11,filename22
+  character(13)       :: stringg,filename11,filename22, filename5
   character(30)       :: cnum,filefct,cnum2
   !-----------
   ! Reals
@@ -150,8 +150,19 @@ program VORONOI
 
   icycle = 1
   open (12,file="energy")
+  open(157, file='script2.gnu')
+  write(157,*) 'reset view'
+
   do while ( icycle < 400 )
-    !
+    write(cnum,*) icycle + maxcycle
+    cnum     = adjustl(cnum)
+
+    filename5 = "3dData."
+    filename5 = trim(filename5)//trim(cnum)
+    ! filename5 = trim(filename5)//trim(".txt")
+
+    open(156, file=filename5)
+
     ! 4- Create Voronoi mesh
     if( debug == 1 ) print*,'   -- > Make Voronoi   ng,n=',ng,n
     call make_voronoi
@@ -211,9 +222,7 @@ program VORONOI
     !  C R E A T I O N       O F      F I L E S
     !
 
-    write(cnum,*) icycle + maxcycle
 
-    cnum     = adjustl(cnum)
     ! OUTPUT file part      ==> File of generators
     call create_part_file(filename,icycle,stringg,cnum,npart,XYp)
     print*,'   Generator file into ',filename
@@ -268,7 +277,7 @@ program VORONOI
     !------------------------------------------------------------------
     icycle = icycle + 1
     energy = 0.0
-    do p = 5,Mesh%nc
+    do p = 205,Mesh%nc
       energy=energy+sqrt((x(p)-Mesh%X_c(p))**2 + (y(p)-Mesh%Y_c(p))**2)
       x(p) = Mesh%X_c(p)
       y(p) = Mesh%Y_c(p)
@@ -280,13 +289,21 @@ program VORONOI
 
     print*, icycle,energy,energy0,(energy/energy0)*100.0_d,"%"
     write(12,*) icycle,energy
-    if (energy/energy0*100.0_d<1) then
-      exit
-    endif
+    ! if (energy/energy0*100.0_d<1) then
+    !   exit
+    ! endif
+
     call odour_transmission(Mesh,icycle, W_c, W_p)
 
+    do p = 1,Mesh%nc
+      write(156, *) Mesh%X_c(p), Mesh%Y_c(p), W_c(p)
+    end do
+    do p = 1,Mesh%nn
+      write(156, *) Mesh%X_n_n(p), Mesh%Y_n_n(p), W_p(p)
+    end do
 
-
+    write(157,*) 'splot [0:1][0:1][0:3]"',trim(filename5), '" u 1:2:3 with points lc palette'
+    write(157,*) 'pause 0.025'
 
    !  if ( modulo(icycle, 20) == 0) then
    !  ! if (energy/energy0*100.0_d<5) then
@@ -306,10 +323,13 @@ program VORONOI
     !-------------------------------------------------------
     deallocate(Mesh%X_n_n, Mesh%Y_n_n)
     deallocate(Mesh%X_c, Mesh%Y_c)
+    close(156)
+
   end do
   !----------------------------------------
   !   C L O S I N G    A R E A
   ! Close script files
+  close(157)
   close(103)
   close(12)
 

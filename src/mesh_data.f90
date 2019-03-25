@@ -21,24 +21,24 @@ module mesh_data
   type Mesh_struct
      sequence
      ! Cell
-     integer                                    :: nc
-     real(kind=real_acc), dimension(:), pointer :: X_c, Y_c ! centroids coor
+     integer                                    :: nc !nombre de cellules
+     real(kind=real_acc), dimension(:), pointer :: X_c, Y_c ! centroids coor (générateurs)
      integer, dimension(:), pointer             :: c_l ! nombre de sommets de la cellule courante
-     integer, dimension(:,:), pointer           :: cell_list ! liste des cellules
-     integer, dimension(:,:), pointer           :: vertex_nid
-     integer, dimension(:), pointer             :: cell_nid
-     integer, dimension(:,:),pointer            :: neighbor
+     integer, dimension(:,:), pointer           :: cell_list ! liste des sommets de la cellule i=num cell, j= num sommet de la cellule i
+     integer, dimension(:,:), pointer           :: vertex_nid ! pas besoin mais num noeuds Voronoi
+     integer, dimension(:), pointer             :: cell_nid ! ordre dans lequel crée
+     integer, dimension(:,:),pointer            :: neighbor ! voisins de la cellule donnée, i=cellule, j=ensemble des voisins
      real(kind=real_acc), dimension(:), pointer :: isoB, area_cell, massCenter
 
      ! Node
-     integer                                    :: nn
-     integer, dimension(:), pointer             :: n_l,boundary
-     integer, dimension(:,:), pointer           :: node_list
-     real(kind=real_acc), dimension(:), pointer :: X_n_n, Y_n_n
-     integer, dimension(:), pointer             :: node_nid
+     integer                                    :: nn !nbre de sommets
+     integer, dimension(:), pointer             :: n_l,boundary !n_l=nbe de cellules autour de ce noeuds (3), boudary= noeuds sur le bord (4)
+     integer, dimension(:,:), pointer           :: node_list !numéro (j) de la cellule autour du noeud (i)
+     real(kind=real_acc), dimension(:), pointer :: X_n_n, Y_n_n !position du sommet
+     integer, dimension(:), pointer             :: node_nid !ordre de création non utile
 
      ! Corner
-     integer                                    :: ncn
+     integer                                    :: ncn !pas utile mais nbr de sous cellules
   end type Mesh_struct
 
   !----------------------------
@@ -70,6 +70,8 @@ module mesh_data
   !   |    v[1]   |         t[2]          |          t[0]          |
   !   |    v[2]   |         t[0]          |          t[1]          |
   !   +-----------+-----------------------+------------------------+
+  !
+  !UTILE POUR DELAUNAY--------------
   !
   type TriTable
      integer,dimension(0:3) :: v      ! Vertexes of triangle
