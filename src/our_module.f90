@@ -170,4 +170,76 @@ contains
     W_c(105:204) = potential(time, 100, 350, 1d0, 0d0)
 
   end subroutine
+
+  subroutine elephantOdourContinuous(Mesh, W_c, W_p)
+    implicit none
+    type(Mesh_struct), intent(inout) :: Mesh
+    real*8,  dimension(:), intent(in) :: W_c,W_p
+    real*8, dimension(205) :: vecX, vecY
+    integer :: i, j
+    real*8, dimension(2) :: S, sumForNextGen
+    real*8 :: odourSum, temp
+
+    ! print*, 'Mesh%nc = ', Mesh%nc
+    do i = 205, Mesh%nc
+    ! do i = 205, 210
+
+      odourSum = 0d0
+      sumForNextGen = sumForNextGen - sumForNextGen
+      ! print*, 'Mesh%nn = ', Mesh%nn
+      ! pause
+
+        do j = 1,Mesh%c_l(i)
+          ! if ( Mesh%cell_list(i,j) .ge. 430 ) then
+          !   print*,  '#################',   Mesh%cell_list(i,j)
+          !
+          ! end if
+          ! print*, "xn(Mesh%cell_list(i,j)) = ", xn(Mesh%cell_list(i,j))
+          ! print*, "yn(Mesh%cell_list(i,j))= ", yn(Mesh%cell_list(i,j))
+
+          temp = DMAX1(0d0, W_p(Mesh%cell_list(i,j)) - W_c(i))
+          S(1) = (xn(Mesh%cell_list(i,j)) - Mesh%X_c(i))
+          S(2) = (yn(Mesh%cell_list(i,j)) - Mesh%Y_c(i))
+          S = temp * S
+          sumForNextGen = sumForNextGen + S
+
+          odourSum = odourSum + temp
+          ! print*, '   temp : ', temp
+
+        end do
+        ! print*, 'odourSum  : ', odourSum
+
+        ! print*, S
+
+        sumForNextGen = sumForNextGen / sqrt(sumForNextGen(1)**2 + sumForNextGen(2)**2)
+        sumForNextGen = sumForNextGen / 10
+
+
+
+        if (S(1) .ne. 0) then
+          if (S(2) .ne. 0) then
+            print*, ' '
+            print*, 'before :'
+            print*, "x = ", Mesh%X_c(i)
+            print*, "y = ", Mesh%Y_c(i)
+
+            vecX = Mesh%X_c(1:205)
+            vecY = Mesh%Y_c(1:205)
+
+            Mesh%X_c(i) = sumForNextGen(1) + Mesh%X_c(i)
+            Mesh%Y_c(i) = sumForNextGen(2) + Mesh%Y_c(i)
+            Mesh%X_c(i) = DMAX1(0d0, DMIN1(1d0, sumForNextGen(1) + Mesh%X_c(i)))
+            Mesh%Y_c(i) = DMAX1(0d0, DMIN1(1d0, sumForNextGen(2) + Mesh%Y_c(i)))
+
+            print*, 'after :'
+            print*, "x = ", Mesh%X_c(i)
+            print*, "y = ", Mesh%Y_c(i)
+            ! vecX = vecX - Mesh%X_c(1:205); vecY = vecY - Mesh%Y_c(1:205)
+            ! print*, vecX, vecY
+
+          end if
+        end if
+  end do
+
+  end subroutine
 end module our_module

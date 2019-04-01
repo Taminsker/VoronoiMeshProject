@@ -112,6 +112,7 @@ program VORONOI
   !-----------------------------------------------------------------------------
   !  O P E N      S C R I P T   F I L E S
   open(103,file='script.gnu')
+
   write(103,*) 'reset'
   ! print*, "ATTTEEENTION - 1"
   write(103,*) 'xmax=',xmax
@@ -153,7 +154,8 @@ program VORONOI
   open(157, file='script2.gnu')
   write(157,*) 'reset view'
 
-  do while ( icycle < 400 )
+! ##########################################
+  do while ( icycle < 30 )
     write(cnum,*) icycle + maxcycle
     cnum     = adjustl(cnum)
 
@@ -207,8 +209,9 @@ program VORONOI
     ! Allocation of (centroid) arrays for centroid position
     ! Compute centroids
     !call compute_centroids( Mesh )
-    call compute_centroids_via_triangles( Mesh, XYp )
+    ! call compute_centroids_via_triangles( Mesh, XYp )
 
+! pause
     if (icycle == 1 ) then
       energy0=0
         do p=5,Mesh%nc
@@ -247,6 +250,8 @@ program VORONOI
     & filename3,'" t "time#',icycle,'" w p pt 6 ps 1 lc 2'
 
     write(103,*) ' pause 0.025'
+    ! write(103,*) ' pause 0.725'
+
 
     !------------------------------------------------------------------
 
@@ -275,6 +280,15 @@ program VORONOI
     ! write(103,*) '  p [xmin-dx:xmax+dx][ymin-dy:ymax+dy+dy] "',&
     ! & filename,'" t "Generator#',Mesh%nc,'" w p pt 5 ps 1 lc 3,"', filename2,'" t "Mesh',in,'," w l lt 1 lc 3 '
     !------------------------------------------------------------------
+
+    call odour_transmission(Mesh,icycle, W_c, W_p)
+    Mesh%X_c = XYp(1:Mesh%nc,1)
+    Mesh%Y_c = XYp(1:Mesh%nc,2)
+!     print*, "X_c = ", Mesh%X_c, "Y_c = ", Mesh%Y_c
+! pause
+    call elephantOdourContinuous(Mesh, W_c, W_p)
+
+
     icycle = icycle + 1
     energy = 0.0
     do p = 205,Mesh%nc
@@ -293,7 +307,6 @@ program VORONOI
     !   exit
     ! endif
 
-    call odour_transmission(Mesh,icycle, W_c, W_p)
 
     do p = 1,Mesh%nc
       write(156, *) Mesh%X_c(p), Mesh%Y_c(p), W_c(p)
