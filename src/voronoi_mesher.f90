@@ -155,7 +155,7 @@ program VORONOI
   write(157,*) 'reset view'
 
 ! ##########################################
-  do while ( icycle < 30 )
+  do while ( icycle < 800 )
     write(cnum,*) icycle + maxcycle
     cnum     = adjustl(cnum)
 
@@ -286,7 +286,7 @@ program VORONOI
     Mesh%Y_c = XYp(1:Mesh%nc,2)
 !     print*, "X_c = ", Mesh%X_c, "Y_c = ", Mesh%Y_c
 ! pause
-    call elephantOdourContinuous(Mesh, W_c, W_p)
+    call elephantOdourContinuous(Mesh, W_c, W_p, icycle)
 
 
     icycle = icycle + 1

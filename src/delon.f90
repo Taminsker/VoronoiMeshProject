@@ -1,7 +1,7 @@
 !********************************************************************
 !                             DELON                                 *
 !********************************************************************
-!   Delon - main subroutine for Delaunay triangulation of a set of  *
+!   Delon - main subroutine for Delaunay of a set of  *
 ! points. This subroutine build a convex hull of the point set.     *
 ! rc - return code of the subroutine:                               *
 !     rc=0 - no error found                                         *
@@ -47,7 +47,7 @@ if(n.ge.MAXP) then
 end if
 !
 xRand=13000000001.
-eps=1.e-12*sqrt((xmax-xmin)**2+(ymax-ymin)**2)
+eps=1.e-20*sqrt((xmax-xmin)**2+(ymax-ymin)**2)
 !
 nt0=1
 

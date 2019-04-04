@@ -139,9 +139,9 @@ contains
     ! initialisation step
 
     W_c(1:4) = 0
-    W_c(5:104) = potential(time, 133, 233, 0.25d0, 0.75d0)
-    W_c(105:204) = potential(time, 100, 350, 3d0, 0d0)
-    W_c(205:Mesh%nc)=0
+    W_c(5:104) = potential(time, 0, 466, 0.25d0, 0.75d0)
+    W_c(105:204) = potential(time, 200, 600, 1d0, 0d0)
+    W_c(205:Mesh%nc) = 0
 
     ! beginning of the odour transmition
 
@@ -166,80 +166,57 @@ contains
     end do
 
     W_c(1:4) = 0
-    W_c(5:104) = potential(time, 133, 233, 0.25d0, 0.75d0)
-    W_c(105:204) = potential(time, 100, 350, 1d0, 0d0)
+    W_c(5:104) = potential(time, 0, 466, 0.25d0, 0.75d0)
+    W_c(105:204) = potential(time, 200, 600, 1d0, 0d0)
 
   end subroutine
 
-  subroutine elephantOdourContinuous(Mesh, W_c, W_p)
+
+
+  subroutine elephantOdourContinuous(Mesh, W_c, W_p, time)
     implicit none
     type(Mesh_struct), intent(inout) :: Mesh
     real*8,  dimension(:), intent(in) :: W_c,W_p
-    real*8, dimension(205) :: vecX, vecY
     integer :: i, j
-    real*8, dimension(2) :: S, sumForNextGen
-    real*8 :: odourSum, temp
+    real*8, dimension(2) :: newGen, Cn, temp
+    integer, intent (in) :: time
+    ! real*8 :: maxOdourOnCell
 
-    ! print*, 'Mesh%nc = ', Mesh%nc
+    ! temp = (/ potential(time, 0, 466, 0.25d0, 0.75d0), potential(time, 200, 600, 1d0, 0d0)/)
+
+
     do i = 205, Mesh%nc
-    ! do i = 205, 210
+      newGen = 0d0
+      ! maxOdourOnCell = 0d0
+      !
+      ! do j = 1,Mesh%c_l(i)
+      !   maxOdourOnCell =  DMAX1(maxOdourOnCell, W_p(Mesh%cell_list(i,j)) - W_c(i))
+      ! end do
 
-      odourSum = 0d0
-      sumForNextGen = sumForNextGen - sumForNextGen
-      ! print*, 'Mesh%nn = ', Mesh%nn
-      ! pause
+      do j = 1,Mesh%c_l(i)
+        Cn = (/xn(Mesh%cell_list(i,j)) - Mesh%X_c(i), yn(Mesh%cell_list(i,j)) - Mesh%Y_c(i)/)
+        Cn = Cn / (sqrt(Cn(1)**2 + Cn(2)**2))
+        newGen = newGen + Cn * DMAX1(0d0, W_p(Mesh%cell_list(i,j)) - W_c(i))
+      end do
 
-        do j = 1,Mesh%c_l(i)
-          ! if ( Mesh%cell_list(i,j) .ge. 430 ) then
-          !   print*,  '#################',   Mesh%cell_list(i,j)
-          !
-          ! end if
-          ! print*, "xn(Mesh%cell_list(i,j)) = ", xn(Mesh%cell_list(i,j))
-          ! print*, "yn(Mesh%cell_list(i,j))= ", yn(Mesh%cell_list(i,j))
+      newGen = newGen / (10 * sqrt(newGen(1)**2 + newGen(2)**2)) + (/ Mesh%X_c(i), Mesh%Y_c(i) /)
+      print*, ' '
+      print*, 'norm = ', sqrt(newGen(1)**2 + newGen(2)**2)
 
-          temp = DMAX1(0d0, W_p(Mesh%cell_list(i,j)) - W_c(i))
-          S(1) = (xn(Mesh%cell_list(i,j)) - Mesh%X_c(i))
-          S(2) = (yn(Mesh%cell_list(i,j)) - Mesh%Y_c(i))
-          S = temp * S
-          sumForNextGen = sumForNextGen + S
-
-          odourSum = odourSum + temp
-          ! print*, '   temp : ', temp
-
-        end do
-        ! print*, 'odourSum  : ', odourSum
-
-        ! print*, S
-
-        sumForNextGen = sumForNextGen / sqrt(sumForNextGen(1)**2 + sumForNextGen(2)**2)
-        sumForNextGen = sumForNextGen / 10
+      print*, 'before :'
+      print*, "x = ", Mesh%X_c(i)
+      print*, "y = ", Mesh%Y_c(i)
+      Mesh%X_c(i) = newGen(1)
+      Mesh%Y_c(i) = newGen(2)
 
 
+      ! Mesh%X_c(i) = DMAX1(0d0, DMIN1(1d0, newGen(1)))
+      ! Mesh%Y_c(i) = DMAX1(0d0, DMIN1(1d0, newGen(2)))
 
-        if (S(1) .ne. 0) then
-          if (S(2) .ne. 0) then
-            print*, ' '
-            print*, 'before :'
-            print*, "x = ", Mesh%X_c(i)
-            print*, "y = ", Mesh%Y_c(i)
-
-            vecX = Mesh%X_c(1:205)
-            vecY = Mesh%Y_c(1:205)
-
-            Mesh%X_c(i) = sumForNextGen(1) + Mesh%X_c(i)
-            Mesh%Y_c(i) = sumForNextGen(2) + Mesh%Y_c(i)
-            Mesh%X_c(i) = DMAX1(0d0, DMIN1(1d0, sumForNextGen(1) + Mesh%X_c(i)))
-            Mesh%Y_c(i) = DMAX1(0d0, DMIN1(1d0, sumForNextGen(2) + Mesh%Y_c(i)))
-
-            print*, 'after :'
-            print*, "x = ", Mesh%X_c(i)
-            print*, "y = ", Mesh%Y_c(i)
-            ! vecX = vecX - Mesh%X_c(1:205); vecY = vecY - Mesh%Y_c(1:205)
-            ! print*, vecX, vecY
-
-          end if
-        end if
-  end do
+      print*, 'after :'
+      print*, "x = ", Mesh%X_c(i)
+      print*, "y = ", Mesh%Y_c(i)
+    end do
 
   end subroutine
 end module our_module
