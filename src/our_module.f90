@@ -5,7 +5,7 @@ module our_module
   implicit none
 
 contains
-  function areaTri(p1, p2, p3)
+  function areaTri(p1, p2, p3) ! Calcul l'aire d'un triangle de sommets p1,p2,p3
     real*8,  dimension(0:1), intent(inout) :: p1, p2, p3
     real :: areaTri
     areaTri = (0.5d0) * abs((p2(0)-p1(0))*(p3(1)-p1(1))- (p3(0)-p1(0))*(p2(1)-p1(1)))
@@ -122,8 +122,11 @@ contains
   ! subroutine temporaire(Mesh)
   !   implicit none
   !   type(Mesh_struct),     intent(inout) :: Mesh
+
   !   open(26,file="neighbor.txt")
-  !   write(26,*) Mesh%neighbor
+  !   do i=1:mesh%nc
+  !     write(26,*) Mesh%neighbor
+  !   end do
   !   close(26)
   ! end subroutine
 
@@ -138,14 +141,19 @@ contains
 
     ! initialisation step
 
-    W_c(1:4) = 0
-    W_c(5:104) = potential(time, 133, 233, 0.25d0, 0.75d0)
-    W_c(105:204) = potential(time, 100, 350, 3d0, 0d0)
-    W_c(205:Mesh%nc)=0
+    W_c(1:4) = 0d0
+    if(time>=133) then
+      W_c(5:104) = potential(time,133,160, 0d0, 1d0)
+    endif
+    if(time<=160) then
+      W_c(105:204) = potential(time, 133, 160, 1d0, 0d0)
+    endif
+
+    W_c(205:Mesh%nc)=0d0
 
     ! beginning of the odour transmition
 
-    do icycle2_the_return_MOMY = 1,Mesh%nc
+    do icycle2_the_return_MOMY = 1,60
       do i = 1,Mesh%nn
         W_p(i) = 0.0d0
         do j = 1,Mesh%n_l(i)  ! boucle sur les noeuds
@@ -165,9 +173,77 @@ contains
       end do
     end do
 
-    W_c(1:4) = 0
-    W_c(5:104) = potential(time, 133, 233, 0.25d0, 0.75d0)
-    W_c(105:204) = potential(time, 100, 350, 1d0, 0d0)
+    W_c(1:4) = 0d0
+    if(time>=133) then
+      W_c(5:104) = potential(time,133,160, 0d0, 1d0)
+    endif
+
+    if(time<=160) then
+      W_c(105:204) = potential(time, 133, 160, 1d0, 0d0)
+    endif
 
   end subroutine
+
+  subroutine elephantOdourDiscrete(Mesh, XYp, W_c, XYnew)
+    implicit none
+    type(Mesh_struct), intent(in) :: Mesh
+    real*8,  dimension(:), intent(in) :: W_c
+    real*8 :: maxW, norm, dx, dy
+    !integer, intent (out) :: maxpos, numnoeud, numcellvois
+    real*8, dimension(:,:), intent(inout) :: XYnew
+    real*8, dimension(:,:), intent(inout) :: XYp !Tableau qui stock les nouvelles position des generateur (selon l'odeur)
+    integer :: i,j,k,maxpos, numnoeud, numcellvois
+
+     !print *, 'W_c(205:mesh%nc)' ,W_c(205:mesh%nc)
+
+    do i=1,204
+      XYnew(i,1)=XYp(i,1)
+      XYnew(i,2)=XYp(i,2)
+    enddo
+
+    do i=205,mesh%nc !boucle sur les cellules
+      maxW=w_c(i)
+      maxpos=i
+      do j=1,mesh%c_l(i) !boucle sur les noeuds de la cellule courante i
+        numnoeud=mesh%cell_list(i,j) !donne le numéro du noeud j de la cellule i
+        do k=1,mesh%n_l(j) ! Boucle sur les cellules voisines du noeud j
+          numcellvois=mesh%node_list(numnoeud,k) !donne le numéro de la cellule voisine au noeud numnoeud
+
+            if (w_c(numcellvois).gt.maxW) then
+              maxW=w_c(numcellvois)
+              maxpos=numcellvois
+            endif
+
+        enddo
+      enddo
+      if (maxpos.ne.i) then
+        norm = sqrt(  (XYp(i,1)-XYp(maxpos,1))**2 + (XYp(i,2)-XYp(maxpos,2))**2   )
+        !print*, 'norm',i,'=',norm,'     maxpos=',maxpos
+        norm = max(norm, 1e-12)   ! pour éviter les /par zéro, les marches arrières
+        dx = -(XYp(i,1)-XYp(maxpos,1)) / norm
+        dy = -(XYp(i,2)-XYp(maxpos,2)) / norm
+        XYnew(i,1)= dx*0.1d0 + XYp(i,1)
+        XYnew(i,2)= dy*0.1d0 + XYp(i,2)
+
+        if( XYnew(i,1)<=0.0d0 ) then
+          XYnew(i,1) = 1e-6
+        endif
+        if( XYnew(i,1)>=1.0d0 ) then
+          XYnew(i,1) = 1.0d0-1e-6
+        endif
+        if( XYnew(i,2)<=0.0d0 ) then
+          XYnew(i,2) = 1e-6
+        endif
+        if( XYnew(i,2)>=1.0d0 ) then
+          XYnew(i,2) = 1.0d0-1e-6
+        endif
+
+      else
+        XYnew(i,1)= XYp(i,1)
+        XYnew(i,2)= XYp(i,2)
+      endif
+
+    enddo
+  endsubroutine
+
 end module our_module

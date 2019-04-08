@@ -16,7 +16,7 @@ program VORONOI
   ! Declarations
   ! ------------
   ! Arrays
-  real*8,  dimension(:,:),   allocatable :: XYp,XYp0,generator_length,XY_c, Weight,grad
+  real*8,  dimension(:,:),   allocatable :: XYp,XYp0,generator_length,XY_c, Weight,grad,XYnew
   real*8,  dimension(:),     allocatable :: Vp, V_c, V_cn, V_n, W_c,WW_c,W_p
   integer, dimension(:,:),   allocatable :: Cp
   integer, dimension(:),     allocatable :: Npa
@@ -91,7 +91,7 @@ program VORONOI
   !   G L O B A L    A L L O C A T I O N S
   !
   max_points = MAXP
-  allocate( XYp(1:max_points,1:2), XYp0(1:max_points,1:2), WW_c(1:max_points) )
+  allocate( XYp(1:max_points,1:2),  XYnew(1:max_points,1:2),XYp0(1:max_points,1:2), WW_c(1:max_points) )
   allocate( Vp(1:100), Cp(1:max_points,1:2), Npa(1:max_points) )
   allocate( W_p(1:max_points), W_c(1:max_points) )
 
@@ -106,6 +106,7 @@ program VORONOI
   npart = npart0
   ! Copy the initial generators
   XYp0 = XYp
+  !XYnew= XYp !ajout hamid chaya
   print*,' --> Initialisation performed npart=',npart0
   !-----------------------------------------------------------------------------
 
@@ -132,20 +133,26 @@ program VORONOI
   if( debug == 1 ) print*,'   -- > Dealloc all in Mesh '
   call dealloc_ini_all(Mesh)
   !
+  print*,'Mesh%nc=',mesh%nc
+  !npart = Mesh%nc
+  n = npart
+  ng = 4
   ! 2- Copy generators into x, y arrays
   if( debug == 1 ) print*,'   -- > Copy generators  npart=',npart
   x(1:npart) = XYp(1:npart,1)
   y(1:npart) = XYp(1:npart,2)
-  n  = npart
+  !n  = npart
   ! ng : nb of generator on boundary
   if( ng < 0 ) then
     ng = 4
   end if
+  ! -----------ajout hamid chaya
+
+  !---------------
   !
   ! 3- Alloc arrays
   if( debug == 1 ) print*,'   -- > Alloc Ini   ng,n=',ng,n
   call alloc_ini(Mesh)
-
 
 
   icycle = 1
@@ -153,7 +160,7 @@ program VORONOI
   open(157, file='script2.gnu')
   write(157,*) 'reset view'
 
-  do while ( icycle < 400 )
+  do while ( icycle < 200 )
     write(cnum,*) icycle + maxcycle
     cnum     = adjustl(cnum)
 
@@ -241,12 +248,15 @@ program VORONOI
 
     ! SCRIPT FOR GNUPLOT
     write(103,*) '  p [xmin-dx:xmax+dx][ymin-dy:ymax+dy+dy] "',&
-    & filename,'" t "Generator#',Mesh%nc,'" w p pt 5 ps 1 lc 3,"', &
-    & filename2,'" t "Mesh" w l lt 1 lc 3,"', &
-    & filename3,'" t "Centroids#',Mesh%nc,'" w p pt 6 ps 1 lc 2,"', &
-    & filename3,'" t "time#',icycle,'" w p pt 6 ps 1 lc 2'
+    & filename,'" t "Generator#',Mesh%nc,'" w p pt 5 ps 1 lc 3,',&
+    & '"Carredomaine" w l lw 2'
+    !& filename2,'" t "Mesh" w l lt 1 lc 3,"', &
+    !& filename3,'" t "Centroids#',Mesh%nc,'" w p pt 6 ps 1 lc 2,"', &
 
-    write(103,*) ' pause 0.025'
+
+    write(103,*) ' pause 0.1'
+
+
 
     !------------------------------------------------------------------
 
@@ -277,23 +287,39 @@ program VORONOI
     !------------------------------------------------------------------
     icycle = icycle + 1
     energy = 0.0
-    do p = 205,Mesh%nc
-      energy=energy+sqrt((x(p)-Mesh%X_c(p))**2 + (y(p)-Mesh%Y_c(p))**2)
-      x(p) = Mesh%X_c(p)
-      y(p) = Mesh%Y_c(p)
-      ! call random_number(XYp(p,1))
-      ! call random_number(XYp(p,2))
-      ! XYp(p, 1) = Mesh%X_c(p)
-      ! XYp(p, 2) = Mesh%Y_c(p)
-    end do
+    ! do p = 205,Mesh%nc
+    !   energy=energy+sqrt((x(p)-Mesh%X_c(p))**2 + (y(p)-Mesh%Y_c(p))**2)
+    !   x(p) = Mesh%X_c(p)
+    !   y(p) = Mesh%Y_c(p)
+    !   ! call random_number(XYp(p,1))
+    !   ! call random_number(XYp(p,2))
+    !   ! XYp(p, 1) = Mesh%X_c(p)
+    !   ! XYp(p, 2) = Mesh%Y_c(p)
+    ! end do
 
-    print*, icycle,energy,energy0,(energy/energy0)*100.0_d,"%"
+    !print*, icycle,energy,energy0,(energy/energy0)*100.0_d,"%"
     write(12,*) icycle,energy
     ! if (energy/energy0*100.0_d<1) then
     !   exit
     ! endif
 
     call odour_transmission(Mesh,icycle, W_c, W_p)
+    call elephantOdourDiscrete(Mesh,XYp,W_c,XYnew)
+    npart=mesh%nc
+    n = npart
+    ng = 4
+
+    x(1:mesh%nc)=XYnew(:,1)
+    y(1:mesh%nc)=XYnew(:,2)
+    ! do p = 1,Mesh%nc
+    !   x(p) = XYnew(p,1)
+    !   y(p) = XYnew(p,2)
+    !   ! call random_number(XYp(p,1))
+    !   ! call random_number(XYp(p,2))
+    !   ! XYp(p, 1) = Mesh%X_c(p)
+    !   ! XYp(p, 2) = Mesh%Y_c(p)
+    ! end do
+
 
     do p = 1,Mesh%nc
       write(156, *) Mesh%X_c(p), Mesh%Y_c(p), W_c(p)
@@ -303,7 +329,7 @@ program VORONOI
     end do
 
     write(157,*) 'splot [0:1][0:1][0:3]"',trim(filename5), '" u 1:2:3 with points lc palette'
-    write(157,*) 'pause 0.025'
+    write(157,*) 'pause 0.5'
 
    !  if ( modulo(icycle, 20) == 0) then
    !  ! if (energy/energy0*100.0_d<5) then
@@ -324,6 +350,7 @@ program VORONOI
     deallocate(Mesh%X_n_n, Mesh%Y_n_n)
     deallocate(Mesh%X_c, Mesh%Y_c)
     close(156)
+
 
   end do
   !----------------------------------------

@@ -32,7 +32,7 @@ module mesh_data
 
      ! Node
      integer                                    :: nn !nbre de sommets
-     integer, dimension(:), pointer             :: n_l,boundary !n_l=nbe de cellules autour de ce noeuds (3), boudary= noeuds sur le bord (4)
+     integer, dimension(:), pointer             :: n_l,boundary !n_l=nbe de cellules autour de ce noeud (3), boudary= noeuds sur le bord (4)
      integer, dimension(:,:), pointer           :: node_list !numéro (j) de la cellule autour du noeud (i)
      real(kind=real_acc), dimension(:), pointer :: X_n_n, Y_n_n !position du sommet
      integer, dimension(:), pointer             :: node_nid !ordre de création non utile
