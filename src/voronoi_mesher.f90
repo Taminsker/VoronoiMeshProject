@@ -155,7 +155,7 @@ program VORONOI
   write(157,*) 'reset view'
 
 ! ##########################################
-  do while ( icycle < 800 )
+  do while ( icycle < 200 )
     write(cnum,*) icycle + maxcycle
     cnum     = adjustl(cnum)
 
@@ -249,7 +249,7 @@ program VORONOI
     & filename3,'" t "Centroids#',Mesh%nc,'" w p pt 6 ps 1 lc 2,"', &
     & filename3,'" t "time#',icycle,'" w p pt 6 ps 1 lc 2'
 
-    write(103,*) ' pause 0.025'
+    write(103,*) ' pause 0.25'
     ! write(103,*) ' pause 0.725'
 
 

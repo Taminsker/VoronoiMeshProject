@@ -413,7 +413,7 @@ subroutine create_wcentroid_file(filename3,icycle,stringg,cnum,Mesh )
     filename = trim(stringg)//trim(cnum)
     !print*,' Cycle =',icycle,' file=',filename
     open(21,file=filename)
-    do p = 1,npart
+    do p = 205,npart
        write(21,*) XYp(p,1),XYp(p,2)
     end do
     close(21)

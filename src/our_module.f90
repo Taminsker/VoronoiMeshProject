@@ -139,13 +139,12 @@ contains
     ! initialisation step
 
     W_c(1:4) = 0
-    W_c(5:104) = potential(time, 0, 466, 0.25d0, 0.75d0)
-    W_c(105:204) = potential(time, 200, 600, 1d0, 0d0)
+    W_c(5:104) = potential(time, 60, 150, 0.25d0, 1d0)
+    W_c(105:204) = potential(time, 50, 140, 1d0, 0d0)
     W_c(205:Mesh%nc) = 0
 
     ! beginning of the odour transmition
-
-    do icycle2_the_return_MOMY = 1,Mesh%nc
+    do icycle2_the_return_MOMY = 1,int(Mesh%nc/6)   ! Modifier le nb d'itérations pour passer les grands nombres de générateurs
       do i = 1,Mesh%nn
         W_p(i) = 0.0d0
         do j = 1,Mesh%n_l(i)  ! boucle sur les noeuds
@@ -166,8 +165,8 @@ contains
     end do
 
     W_c(1:4) = 0
-    W_c(5:104) = potential(time, 0, 466, 0.25d0, 0.75d0)
-    W_c(105:204) = potential(time, 200, 600, 1d0, 0d0)
+    W_c(5:104) = potential(time, 60, 150, 0.25d0, 1d0)
+    W_c(105:204) = potential(time, 50, 140, 1d0, 0d0)
 
   end subroutine
 
@@ -199,23 +198,23 @@ contains
         newGen = newGen + Cn * DMAX1(0d0, W_p(Mesh%cell_list(i,j)) - W_c(i))
       end do
 
-      newGen = newGen / (10 * sqrt(newGen(1)**2 + newGen(2)**2)) + (/ Mesh%X_c(i), Mesh%Y_c(i) /)
-      print*, ' '
-      print*, 'norm = ', sqrt(newGen(1)**2 + newGen(2)**2)
+      newGen = newGen / (20 * sqrt(newGen(1)**2 + newGen(2)**2)) + (/ Mesh%X_c(i), Mesh%Y_c(i) /)
+      ! print*, ' '
+      ! print*, 'norm = ', sqrt(newGen(1)**2 + newGen(2)**2)
 
-      print*, 'before :'
-      print*, "x = ", Mesh%X_c(i)
-      print*, "y = ", Mesh%Y_c(i)
+      ! print*, 'before :'
+      ! print*, "x = ", Mesh%X_c(i)
+      ! print*, "y = ", Mesh%Y_c(i)
       Mesh%X_c(i) = newGen(1)
       Mesh%Y_c(i) = newGen(2)
 
 
-      ! Mesh%X_c(i) = DMAX1(0d0, DMIN1(1d0, newGen(1)))
-      ! Mesh%Y_c(i) = DMAX1(0d0, DMIN1(1d0, newGen(2)))
+      Mesh%X_c(i) = DMAX1(0d0 + 1e-8, DMIN1(1d0 - 1e-8 , newGen(1)))
+      Mesh%Y_c(i) = DMAX1(0d0 + 1e-8, DMIN1(1d0 - 1e-8, newGen(2)))
 
-      print*, 'after :'
-      print*, "x = ", Mesh%X_c(i)
-      print*, "y = ", Mesh%Y_c(i)
+      ! print*, 'after :'
+      ! print*, "x = ", Mesh%X_c(i)
+      ! print*, "y = ", Mesh%Y_c(i)
     end do
 
   end subroutine
