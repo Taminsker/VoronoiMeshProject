@@ -104,5 +104,13 @@ module mesh_data
   !
   !-------------------------------------------------------
 
+  integer :: t0_source1, t1_source1, t0_source2, t1_source2
+  real(kind=r_acc) :: a_source1, b_source1, a_source2, b_source2
+  real(kind=r_acc) :: x_source1, y_source1, dxdy_source1
+  real(kind=r_acc) :: x_source2, y_source2, dxdy_source2
+  real(kind=r_acc) :: x_lac, y_lac, rayon
+
+  integer :: depassement = 0
+
 
 end	module mesh_data
