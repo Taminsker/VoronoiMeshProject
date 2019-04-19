@@ -423,7 +423,7 @@ contains
     open(21,file=filename)
     write(21,*) ' '
     if (.NOT. rayon == 0d0) then
-      do j = 1,1000
+      do j = 1,5000
         call random_number(x)
         call random_number(y)
         x = 2 * x -1

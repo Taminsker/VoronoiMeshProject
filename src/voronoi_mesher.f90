@@ -37,7 +37,7 @@ program VORONOI
 
   ! Integer
   integer :: i,j,k,kk,jj,ii,in,inn,ne, p
-  integer :: maxcycle, max_points,max_number_generators
+  integer :: maxcycle, max_points,max_number_generators, choiceDeplacement
   integer, external :: iDirGen
   !
   print*,'************************************************'
@@ -66,11 +66,11 @@ program VORONOI
   b_source2 = 0.25_rr
 
   ! Lac
-  x_lac = 0.8_rr
-  y_lac = 0.2_rr
-  rayon = 0.0_rr
+  x_lac = 0.5_rr
+  y_lac = 0.5_rr
+  rayon = 0.1_rr
 
-  depassement = 1
+  depassement = 0
   ! ------------------------------------
   ! Debug=0, quiet. Debug=1, print to screen
   debug = 0
@@ -140,7 +140,7 @@ program VORONOI
   npart = npart0
   ! Copy the initial generators
   XYp0 = XYp
-  print*,' --> Initialisation performed npart=',npart0
+  ! print*,' --> Initialisation performed npart=',npart0
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
@@ -193,12 +193,14 @@ program VORONOI
   write(180,*) 'ymin=',ymin
   write(180,*) 'dx=',(xmax-xmin)/10.0_d
   write(180,*) 'dy=',(ymax-ymin)/10.0_d
- write(157,*) 'reset'
+  write(157,*) 'reset'
 
-! ##########################################
+  ! ##########################################
 
-print*,' How many cycles ? ';
-read*, maxCycleT
+  print*,' How many cycles ? ';
+  read*, maxCycleT
+  print*, 'Deplacement : 0 - continue, 1 - discret :'
+  read*, choiceDeplacement
 
   do while ( icycle < maxCycleT )
     write(cnum,*) icycle + maxcycle
@@ -258,7 +260,7 @@ read*, maxCycleT
     !call compute_centroids( Mesh )
     ! call compute_centroids_via_triangles( Mesh, XYp )
 
-! pause
+    ! pause
     ! if (icycle == 1 ) then
     !   energy0=0
     !     do p=5,Mesh%nc
@@ -359,10 +361,13 @@ read*, maxCycleT
     Mesh%X_c = XYp(1:Mesh%nc,1)
     Mesh%Y_c = XYp(1:Mesh%nc,2)
 
-!     print*, "X_c = ", Mesh%X_c, "Y_c = ", Mesh%Y_c
-! pause
-    call elephantOdourContinuous(Mesh, W_c, W_p)
-    ! call elephantOdourDiscrete(Mesh, W_c)
+    !     print*, "X_c = ", Mesh%X_c, "Y_c = ", Mesh%Y_c
+    ! pause
+    if (choiceDeplacement == 0) then
+      call elephantOdourContinuous(Mesh, W_c, W_p)
+    else
+      call elephantOdourDiscrete(Mesh, W_c)
+    end if
 
     if (depassement == 1) then
       xmin = DMIN1(MINVAL(Mesh%X_c(5:Mesh%nc)), MINVAL(Mesh%Y_c(5:Mesh%nc)), 0d0) - 1e-2
@@ -419,17 +424,17 @@ read*, maxCycleT
 
     write(157,*) 'pause 0.025'
 
-   !  if ( modulo(icycle, 20) == 0) then
-   !  ! if (energy/energy0*100.0_d<5) then
-   ! !
-   !  npart = Mesh%nc+5
-   !  do i = 1, 5
-   !    call random_number(xx)
-   !    call random_number(yy)
-   !    x(mesh%nc+i) = xx/8_d + 0.4325_d
-   !    y(mesh%nc+i) = yy/8_d + 0.4325_d
-   !  end do
-   ! end if
+    !  if ( modulo(icycle, 20) == 0) then
+    !  ! if (energy/energy0*100.0_d<5) then
+    ! !
+    !  npart = Mesh%nc+5
+    !  do i = 1, 5
+    !    call random_number(xx)
+    !    call random_number(yy)
+    !    x(mesh%nc+i) = xx/8_d + 0.4325_d
+    !    y(mesh%nc+i) = yy/8_d + 0.4325_d
+    !  end do
+    ! end if
     n = npart
     ng = 4
     !-------------------------------------------------------
@@ -449,13 +454,13 @@ read*, maxCycleT
 
 
 
-!call potential(t,t0,t1,a,b,pot)
+  !call potential(t,t0,t1,a,b,pot)
   !open(13,file="potentiel")
   !do p = 0,30
 
-    ! pot = potential(p,10,20,0.5_d,1.0_d)
+  ! pot = potential(p,10,20,0.5_d,1.0_d)
 
-    ! write(13,*) p,pot
+  ! write(13,*) p,pot
   ! end do
 
   ! close(13)
