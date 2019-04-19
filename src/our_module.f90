@@ -174,7 +174,7 @@ contains
     nodes = 0
 
     do while (anotherRound .EQV. .TRUE.)
-    ! do icycle2_the_return_MOMY = 1,nint(Mesh%nc/2d0)+1   ! Modifier le nb d'itérations pour passer les grands nombres de générateurs
+      ! do icycle2_the_return_MOMY = 1,nint(Mesh%nc/2d0)+1   ! Modifier le nb d'itérations pour passer les grands nombres de générateurs
 
       if (time >= t0_source1) then
         W_c(5:104) = potential(time, t0_source1, t1_source1, a_source1, b_source1)
@@ -243,20 +243,82 @@ contains
     ! ! print*, 'W_p() = ', W_p
   end subroutine
 
+  subroutine elephantOdourDiscrete(Mesh, W_c)
+    implicit none
+    type(Mesh_struct), intent(in) :: Mesh
+    real*8,  dimension(:), intent(in) :: W_c
+    real*8 :: maxW, norm, x, y
+    !integer, intent (out) :: maxpos, numnoeud, numcellvois
+    real*8, dimension(2) :: d, newGen
+    integer :: i,j,k,maxpos, numnoeud, numcellvois
 
 
-  subroutine elephantOdourContinuous(Mesh, W_c, W_p, time)
+    do i=205,mesh%nc !boucle sur les cellules
+      maxW = w_c(i)
+      maxpos = i
+
+      do j=1,mesh%c_l(i) !boucle sur les noeuds de la cellule courante i
+        numnoeud=mesh%cell_list(i,j) !donne le numéro du noeud j de la cellule i
+        do k=1,mesh%n_l(j) ! Boucle sur les cellules voisines du noeud j
+          if (.NOT. k == i) then
+            numcellvois=mesh%node_list(numnoeud,k) !donne le numéro de la cellule voisine au noeud numnoeud
+            if (w_c(numcellvois) .gt. maxW) then
+              maxW=w_c(numcellvois)
+              maxpos=numcellvois
+            endif
+          endif
+        end do
+      end do
+
+      ! if (maxpos .ne. i) then
+      ! print*, ' '
+      ! print*, 'cell c', i, 'maxpos', maxpos
+      norm = sqrt((Mesh%X_c(i)-Mesh%X_c(maxpos))**2 + (Mesh%Y_c(i)-Mesh%Y_c(maxpos))**2)
+      norm = max(norm, 1e-12)   ! pour éviter les /par zéro, les marches arrières
+      ! print*, 'norm', norm
+      d = (1d0 / norm) * (/Mesh%X_c(maxpos)-Mesh%X_c(i), Mesh%Y_c(maxpos) - Mesh%Y_c(i)/)
+      ! print*, 'vector', d
+
+      newGen = d * 0.01d0 + (/ mesh%X_c(i), mesh%Y_c(i)/)
+
+      x = sqrt((newGen(1) - x_lac)**2 + (newGen(2) - y_lac)**2)
+
+      if (x <= rayon) then
+        call random_number(y)
+        y = nint(y * 10)
+        newGen(1) = x_lac + (rayon) * (newGen(1) - x_lac) / x + y * 1e-3
+        newGen(2) = y_lac + (rayon) * (newGen(2) - y_lac) / x + y * 1e-3
+      end if
+
+      Mesh%X_c(i) = newGen(1)
+      Mesh%Y_c(i) = newGen(2)
+
+      ! if ((.NOT. Mesh%X_c(i) == DMAX1(0d0 + 1e-8, DMIN1(1d0 - 1e-8 , newGen(1)))) &
+      ! .OR. (.NOT. Mesh%Y_c(i) == DMAX1(0d0 + 1e-8, DMIN1(1d0 - 1e-8 , newGen(2))))) then
+      !   print*, Mesh%X_c(i), Mesh%Y_c(i)
+      ! end if
+      if (isnan(newGen(1))) stop '"newGen(1)" is a NaN'
+      if (isnan(newGen(2))) stop '"newGen(2)" is a NaN'
+
+      if (depassement == 0) then
+        Mesh%X_c(i) = DMAX1(xmin + 1e-6, DMIN1(xmax - 1e-6 , newGen(1)))
+        Mesh%Y_c(i) = DMAX1(ymin + 1e-6, DMIN1(ymax - 1e-6, newGen(2)))
+      end if
+
+    end do
+    ! else
+    !   XYnew(i,1)= XYp(i,1)
+    !   XYnew(i,2)= XYp(i,2)
+    ! endif
+  endsubroutine
+
+  subroutine elephantOdourContinuous(Mesh, W_c, W_p)
     implicit none
     type(Mesh_struct), intent(inout) :: Mesh
     real*8,  dimension(:), intent(in) :: W_c,W_p
     real*8 :: x, y, xprime, yprime
     integer :: i, j
     real*8, dimension(2) :: newGen, Cn, temp
-    integer, intent (in) :: time
-    ! real*8 :: maxOdourOnCell
-
-    ! temp = (/ potential(time, 0, 466, 0.25d0, 0.75d0), potential(time, 200, 600, 1d0, 0d0)/)
-
 
     do i = 205, Mesh%nc
       newGen = 0d0
@@ -272,7 +334,7 @@ contains
       end do
 
       if (.NOT. sqrt(newGen(1)**2 + newGen(2)**2) == 0d0) then
-      newGen = newGen / (100 / xmax * sqrt(newGen(1)**2 + newGen(2)**2)) + (/ Mesh%X_c(i), Mesh%Y_c(i) /)
+        newGen = newGen / (100 / xmax * sqrt(newGen(1)**2 + newGen(2)**2)) + (/ Mesh%X_c(i), Mesh%Y_c(i) /)
       else
         newGen = (/ Mesh%X_c(i), Mesh%Y_c(i) /)
       end if
@@ -301,12 +363,6 @@ contains
         Mesh%Y_c(i) = DMAX1(ymin + 1e-8, DMIN1(ymax - 1e-8, newGen(2)))
       end if
 
-
-
-
-      ! print*, 'after :'
-      ! print*, "x = ", Mesh%X_c(i)
-      ! print*, "y = ", Mesh%Y_c(i)
     end do
 
   end subroutine
@@ -330,7 +386,7 @@ contains
 
     open(21,file=filename)
     do p = 1,204
-       write(21,*) XYp(p,1),XYp(p,2)
+      write(21,*) XYp(p,1),XYp(p,2)
     end do
     close(21)
 
@@ -340,7 +396,7 @@ contains
 
     open(21,file=filename)
     do p = 205,Mesh%nc
-       write(21,*) XYp(p,1),XYp(p,2)
+      write(21,*) XYp(p,1),XYp(p,2)
     end do
     close(21)
 
@@ -350,12 +406,12 @@ contains
 
     open(21,file=filename)
     do j = 1,Mesh%nc
-       do i = 1,Mesh%c_l(j)
-          write(21,*) xn( Mesh%cell_list(j,i) ), yn( Mesh%cell_list(j,i) ), 0
-       end do
+      do i = 1,Mesh%c_l(j)
+        write(21,*) xn( Mesh%cell_list(j,i) ), yn( Mesh%cell_list(j,i) ), 0
+      end do
 
-       write(21,*)  xn( Mesh%cell_list(j,1) ), yn( Mesh%cell_list(j,1) ), 0
-       write(21,*) ''
+      write(21,*)  xn( Mesh%cell_list(j,1) ), yn( Mesh%cell_list(j,1) ), 0
+      write(21,*) ''
 
     end do
     close(21)
@@ -365,15 +421,18 @@ contains
     filename = trim(filename)//trim(cnum)
 
     open(21,file=filename)
-    do j = 1,1000
-      call random_number(x)
-      call random_number(y)
-      x = 2 * x -1
-      y = 2 * y -1
-      xprime = x * sqrt(1 - (y**2)/2)
-      yprime = y * sqrt(1 - (x**2)/2)
-      write(21,*) (rayon- 2*1e-2) * xprime + x_lac, (rayon- 2*1e-2) * yprime + y_lac, 0
-    end do
+    write(21,*) ' '
+    if (.NOT. rayon == 0d0) then
+      do j = 1,1000
+        call random_number(x)
+        call random_number(y)
+        x = 2 * x -1
+        y = 2 * y -1
+        xprime = x * sqrt(1 - (y**2)/2)
+        yprime = y * sqrt(1 - (x**2)/2)
+        write(21,*) (rayon- 2*1e-2) * xprime + x_lac, (rayon- 2*1e-2) * yprime + y_lac, 0
+      end do
+    endif
     close(21)
 
   end subroutine

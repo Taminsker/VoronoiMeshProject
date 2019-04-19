@@ -68,7 +68,7 @@ program VORONOI
   ! Lac
   x_lac = 0.8_rr
   y_lac = 0.2_rr
-  rayon = 0.1_rr
+  rayon = 0.0_rr
 
   depassement = 1
   ! ------------------------------------
@@ -78,6 +78,7 @@ program VORONOI
   !----------------------------------------------------
   ! Define small real numbers to compare two reals
   eps = epsilon(eps) * 100d0
+
   eps = 1.e-10
   !----------------------------------------------------
 
@@ -89,7 +90,8 @@ program VORONOI
   !if( abs(problem)>1 ) problem = 0
   !=========================================================
 
-  ! Computational domain
+  ! Computational domain   end subroutine
+
   !print*,' Domain to test: '
   j = 0
   select case( j )
@@ -277,7 +279,7 @@ read*, maxCycleT
 
     ! OUTPUT FILE mesh ==> File mesh.#   polygons
     call create_mesh_file(filename2,icycle,stringg,cnum,Mesh,XYp,WW_c)
-    ! print*,'   Mesh file into ',filename2
+    ! print*,'   Mesh file into ',filename2, icycle
     ! OUTPUT FILE mesh ==> File tria.#   triangles
     ! call create_trimesh_file(filename2,icycle,stringg,cnum,Mesh,XYp,WW_c)
     ! print*,'   TriMesh file into ',filename2
@@ -359,7 +361,8 @@ read*, maxCycleT
 
 !     print*, "X_c = ", Mesh%X_c, "Y_c = ", Mesh%Y_c
 ! pause
-    call elephantOdourContinuous(Mesh, W_c, W_p, icycle)
+    call elephantOdourContinuous(Mesh, W_c, W_p)
+    ! call elephantOdourDiscrete(Mesh, W_c)
 
     if (depassement == 1) then
       xmin = DMIN1(MINVAL(Mesh%X_c(5:Mesh%nc)), MINVAL(Mesh%Y_c(5:Mesh%nc)), 0d0) - 1e-2
