@@ -13,6 +13,9 @@ program VORONOI
 
   implicit none
   !
+
+  !
+  !
   ! Declarations
   ! ------------
   ! Arrays
@@ -22,7 +25,7 @@ program VORONOI
   integer, dimension(:),     allocatable :: Npa
   ! Variables
   integer  :: ncells, npoints, nx, ny, Nppc, npart, npart0
-  integer  :: nstep,channel,exxit,problem,method
+  integer  :: nstep,channel,exxit,problem,method, maxCycleT
   ! Characters
   character(10)       :: filename,filename2,filename3,filename33
   character(13)       :: stringg,filename11,filename22, filename5
@@ -43,6 +46,32 @@ program VORONOI
   print*,'*                                              *'
   print*,'************************************************'
   !
+  ! ------------------------------------
+  ! Source 1
+  x_source1 = 0.15_rr
+  y_source1 = 0.15_rr
+  dxdy_source1 = 0.1_rr
+  t0_source1 = 133
+  t1_source1 = 210
+  a_source1 = 0.25_rr
+  b_source1 = 0.9_rr
+
+  ! Source 2
+  x_source2 = 0.65_rr
+  y_source2 = 0.65_rr
+  dxdy_source2 = 0.1_rr
+  t0_source2 = 100
+  t1_source2 = 153
+  a_source2 = 0.9_rr
+  b_source2 = 0.25_rr
+
+  ! Lac
+  x_lac = 0.8_rr
+  y_lac = 0.2_rr
+  rayon = 0.1_rr
+
+  depassement = 1
+  ! ------------------------------------
   ! Debug=0, quiet. Debug=1, print to screen
   debug = 0
 
@@ -64,6 +93,9 @@ program VORONOI
   !print*,' Domain to test: '
   j = 0
   select case( j )
+  case(3)
+    xmin = 0.0_rr ; ymin = 0.0_rr
+    xmax = 100.0_rr ; ymax = 100.0_rr
   case(2)
     print*,' Enter xmin, xmax, ymin, ymax'
     read*,xmin,xmax,ymin,ymax
@@ -147,15 +179,26 @@ program VORONOI
   if( debug == 1 ) print*,'   -- > Alloc Ini   ng,n=',ng,n
   call alloc_ini(Mesh)
 
-
-
   icycle = 1
   open (12,file="energy")
   open(157, file='script2.gnu')
-  write(157,*) 'reset view'
+  open(180, file='script3.gnu')
+
+  write(180,*) 'reset'
+  write(180,*) 'xmax=',xmax
+  write(180,*) 'xmin=',xmin
+  write(180,*) 'ymax=',ymax
+  write(180,*) 'ymin=',ymin
+  write(180,*) 'dx=',(xmax-xmin)/10.0_d
+  write(180,*) 'dy=',(ymax-ymin)/10.0_d
+ write(157,*) 'reset'
 
 ! ##########################################
-  do while ( icycle < 200 )
+
+print*,' How many cycles ? ';
+read*, maxCycleT
+
+  do while ( icycle < maxCycleT )
     write(cnum,*) icycle + maxcycle
     cnum     = adjustl(cnum)
 
@@ -166,13 +209,15 @@ program VORONOI
     open(156, file=filename5)
 
     ! 4- Create Voronoi mesh
-    if( debug == 1 ) print*,'   -- > Make Voronoi   ng,n=',ng,n
+    ! if( debug == 1 ) print*,'   -- > Make Voronoi   ng,n=',ng,n
     call make_voronoi
     !
     ! 4- Create Voronoi mesh into data structure Mesh%
     critical_length = 0.0_d  ;  critical_angle  = 0.0_d
-    if( debug == 1 ) print*,'   -- > Voronoi to staggered'
+    ! if( debug == 1 ) print*,'   -- > Voronoi to staggered'
     call voronoi_to_staggered(critical_length,critical_angle)
+
+
 
     XYp(1:Mesh%nc,1) = x(1:Mesh%nc)
     XYp(1:Mesh%nc,2) = y(1:Mesh%nc)
@@ -191,10 +236,10 @@ program VORONOI
 
     !------------------------------------------------------
     ! Compute subcell number
-    Mesh%ncn = 0
-    do i = 1,Mesh%nc
-      Mesh%ncn = Mesh%ncn + Mesh%c_l(i)
-    end do
+    ! Mesh%ncn = 0
+    ! do i = 1,Mesh%nc
+    !   Mesh%ncn = Mesh%ncn + Mesh%c_l(i)
+    ! end do
     !-------------------------------------------------------
     ! Allocation of (node) structure for node positions
     !-------------------------------------------------------
@@ -212,12 +257,12 @@ program VORONOI
     ! call compute_centroids_via_triangles( Mesh, XYp )
 
 ! pause
-    if (icycle == 1 ) then
-      energy0=0
-        do p=5,Mesh%nc
-          energy0=energy0+sqrt((x(p)-Mesh%X_c(p))**2 + (y(p)-Mesh%Y_c(p))**2 )
-        enddo
-    endif
+    ! if (icycle == 1 ) then
+    !   energy0=0
+    !     do p=5,Mesh%nc
+    !       energy0=energy0+sqrt((x(p)-Mesh%X_c(p))**2 + (y(p)-Mesh%Y_c(p))**2 )
+    !     enddo
+    ! endif
     !-------------------------------------------------------
 
     !--------------------------------------------------------------------
@@ -228,11 +273,11 @@ program VORONOI
 
     ! OUTPUT file part      ==> File of generators
     call create_part_file(filename,icycle,stringg,cnum,npart,XYp)
-    print*,'   Generator file into ',filename
+    ! print*,'   Generator file into ',filename
 
     ! OUTPUT FILE mesh ==> File mesh.#   polygons
     call create_mesh_file(filename2,icycle,stringg,cnum,Mesh,XYp,WW_c)
-    print*,'   Mesh file into ',filename2
+    ! print*,'   Mesh file into ',filename2
     ! OUTPUT FILE mesh ==> File tria.#   triangles
     ! call create_trimesh_file(filename2,icycle,stringg,cnum,Mesh,XYp,WW_c)
     ! print*,'   TriMesh file into ',filename2
@@ -240,16 +285,39 @@ program VORONOI
     ! OUTPUT FILE mesh ==> File centr.#  centroids
     filename3 = 'centr'
     call create_centroid_file(filename3,icycle,stringg,cnum,Mesh )
-    print*,'   Centroid file into ',filename3
+    call creat_script3(icycle, Mesh, XYp)
+
+    ! write(180, *)  'p [xmin-dx:xmax+dx][ymin-dy:ymax+dy+dy] "',&
+    write(180,*) '  p [',xmin,'-',(xmax-xmin)/10.0_d,':',xmax,'+',&
+    & (xmax-xmin)/10.0_d,'][',ymin,'-',(ymax-ymin)/10.0_d,':',&
+    & ymax+ 2*1e-1,'+',(ymax-ymin)/10.0_d,'] "',&
+    & 'maillage.'//trim(cnum),'" t "Maillage de Voronoï " w l lt 1 lc rgb "bisque", "', &
+    & 'elephants.'//trim(cnum),'" t "Éléphants ',Mesh%nc-204,'" w p pt 11 ps 1 lc rgb "grey40", "', &
+    & 'trees.'//trim(cnum),'" t "Arbres',204,'" w p pt 3 ps 1 lc rgb "dark-green", "', &
+    & 'lac.'//trim(cnum),'" t "Eau" w p pt 5 ps 1 lc rgb "light-blue"'
+
+
+    write(180, *) 'set title "Itération numéro ',icycle,'sur ', maxCycleT,'"'
+    write(180,*) ' pause 0.025'
+
+
+
+
+
+
+    ! print*,'   Centroid file into ',filename3
 
     ! SCRIPT FOR GNUPLOT
-    write(103,*) '  p [xmin-dx:xmax+dx][ymin-dy:ymax+dy+dy] "',&
-    & filename,'" t "Generator#',Mesh%nc,'" w p pt 5 ps 1 lc 3,"', &
+    ! write(103,*) '  p [xmin-dx:xmax+dx][ymin-dy:ymax+dy+dy] "',&
+    write(103,*) '  p [',xmin,'-',(xmax-xmin)/10.0_d,':',&
+    & xmax,'+',(xmax-xmin)/10.0_d,'][',ymin,'-',&
+    & (ymax-ymin)/10.0_d,':',ymax,'+',(ymax-ymin)/10.0_d,'] "',&
+    & filename,'" t "Generator#',Mesh%nc,'" w p pt 5 ps 1 lc rgb "grey","', &
     & filename2,'" t "Mesh" w l lt 1 lc 3,"', &
     & filename3,'" t "Centroids#',Mesh%nc,'" w p pt 6 ps 1 lc 2,"', &
-    & filename3,'" t "time#',icycle,'" w p pt 6 ps 1 lc 2'
+    & filename3,'" t "time#',icycle+2,'" w p pt 6 ps 1 lc 2'
 
-    write(103,*) ' pause 0.25'
+    write(103,*) ' pause 0.025'
     ! write(103,*) ' pause 0.725'
 
 
@@ -282,40 +350,70 @@ program VORONOI
     !------------------------------------------------------------------
 
     call odour_transmission(Mesh,icycle, W_c, W_p)
+    XYp0(1:Mesh%nc,1) = Mesh%X_c
+    XYp0(1:Mesh%nc,2) = Mesh%Y_c
+
+
     Mesh%X_c = XYp(1:Mesh%nc,1)
     Mesh%Y_c = XYp(1:Mesh%nc,2)
+
 !     print*, "X_c = ", Mesh%X_c, "Y_c = ", Mesh%Y_c
 ! pause
     call elephantOdourContinuous(Mesh, W_c, W_p, icycle)
 
+    if (depassement == 1) then
+      xmin = DMIN1(MINVAL(Mesh%X_c(5:Mesh%nc)), MINVAL(Mesh%Y_c(5:Mesh%nc)), 0d0) - 1e-2
+      ymin = xmin
+      xmax = DMAX1(MAXVAL(Mesh%X_c(5:Mesh%nc)), MAXVAL(Mesh%Y_c(5:Mesh%nc)), 1d0) + 1e-2
+      ymax = xmax
+      ! print*, 'xmin', xmin, 'xmax', xmax, 'ymin', ymin, 'ymax', ymax
+      Mesh%X_c(1) = xmin; Mesh%Y_c(1) = ymin
+      Mesh%X_c(2) = xmax; Mesh%Y_c(2) = ymin
+      Mesh%X_c(3) = xmax; Mesh%Y_c(3) = ymax
+      Mesh%X_c(4) = xmin; Mesh%Y_c(4) = ymax
+    end if
+
+
+    x(1:mesh%nc) = Mesh%X_c
+    y(1:mesh%nc) = Mesh%Y_c
+
+
+
 
     icycle = icycle + 1
-    energy = 0.0
-    do p = 205,Mesh%nc
-      energy=energy+sqrt((x(p)-Mesh%X_c(p))**2 + (y(p)-Mesh%Y_c(p))**2)
-      x(p) = Mesh%X_c(p)
-      y(p) = Mesh%Y_c(p)
-      ! call random_number(XYp(p,1))
-      ! call random_number(XYp(p,2))
-      ! XYp(p, 1) = Mesh%X_c(p)
-      ! XYp(p, 2) = Mesh%Y_c(p)
-    end do
+    ! energy = 0.0
+    ! do p = 205,Mesh%nc
+    !   energy=energy+sqrt((x(p)-Mesh%X_c(p))**2 + (y(p)-Mesh%Y_c(p))**2)
+    !   x(p) = Mesh%X_c(p)
+    !   y(p) = Mesh%Y_c(p)
+    !   ! call random_number(XYp(p,1))
+    !   ! call random_number(XYp(p,2))
+    !   ! XYp(p, 1) = Mesh%X_c(p)
+    !   ! XYp(p, 2) = Mesh%Y_c(p)
+    ! end do
 
-    print*, icycle,energy,energy0,(energy/energy0)*100.0_d,"%"
+    print*,'cycle numero : ', icycle, '/', maxCycleT
+    ! print*, icycle,energy,energy0,(energy/energy0)*100.0_d,"%"
     write(12,*) icycle,energy
     ! if (energy/energy0*100.0_d<1) then
     !   exit
     ! endif
 
+    ! do p = 1,Mesh%nc
+    !   write(156, *) XYp0(p,1), XYp0(p,2), W_c(p)
+    ! end do
 
     do p = 1,Mesh%nc
       write(156, *) Mesh%X_c(p), Mesh%Y_c(p), W_c(p)
     end do
-    do p = 1,Mesh%nn
-      write(156, *) Mesh%X_n_n(p), Mesh%Y_n_n(p), W_p(p)
-    end do
+    ! do p = 1,Mesh%nn
+    !   write(156, *) Mesh%X_n_n(p), Mesh%Y_n_n(p), W_p(p)
+    ! end do
 
-    write(157,*) 'splot [0:1][0:1][0:3]"',trim(filename5), '" u 1:2:3 with points lc palette'
+    write(157,*) 'splot [',xmin,':',xmax,'][',ymin,':',ymax,'][0:1]"3dData.',&
+    &trim(cnum), '" u 1:2:3 w p t "Éléphants et arbres" lc palette, "lac.',&
+    &trim(cnum), '" u 1:2:3 w p t "Eau" lc rgb "light-blue"'
+
     write(157,*) 'pause 0.025'
 
    !  if ( modulo(icycle, 20) == 0) then
